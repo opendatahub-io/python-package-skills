@@ -1,0 +1,8 @@
+{
+  "name": "python-package-skills",
+  "version": "0.1.0",
+  "description": "AI skills for Python package onboarding into the RHAI pipeline",
+  "author": { "name": "opendatahub-io" },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/opendatahub-io/python-package-skills"
+}
