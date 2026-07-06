@@ -7,7 +7,6 @@ AI skills for Python package onboarding into Red Hat's AI package distribution p
 | Skill | Description |
 |---|---|
 | [builder-onboarding](skills/builder-onboarding/) | Configure a Python package in the RHAI builder repository |
-| [probe-test-onboarding](skills/probe-test-onboarding/) | Create probe tests for a Python package in the wheels-test repository |
 
 ## Architecture
 
