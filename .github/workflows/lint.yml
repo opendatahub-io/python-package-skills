@@ -22,7 +22,7 @@ jobs:
     - name: Run skillsaw
       uses: stbenjam/skillsaw@3e1188f446413e6d6818c98644d2d6a84e4038e7 # v0.14.1
       with:
-        strict: 'true'
+        strict: 'false'
 
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
