@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euo pipefail
 
 # deterministic-commit.sh — Programmatic git commit for onboarding steps.
 # Replaces prompt-driven git add/commit/amend with a single script call
@@ -69,7 +69,7 @@ done
 # --- Pre-commit linter pass (catch auto-fixes before staging) ---
 if [[ -n "$lint_cmd" ]]; then
     echo "==> Running linter (pre-commit)..."
-    eval "$lint_cmd" || true
+    bash -c "$lint_cmd" || true
 fi
 
 # --- Stage ---
@@ -112,7 +112,7 @@ if [[ -n "$lint_cmd" ]]; then
     max_amend=3
     for (( i = 1; i <= max_amend; i++ )); do
         echo "==> Running linter (post-commit pass ${i}/${max_amend})..."
-        eval "$lint_cmd" || true
+        bash -c "$lint_cmd" || true
 
         if git diff --quiet && git diff --cached --quiet; then
             echo "Working tree clean after linting."

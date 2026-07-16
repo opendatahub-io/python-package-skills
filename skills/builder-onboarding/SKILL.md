@@ -59,13 +59,13 @@ Read `/workspace/_context/builder-context.json` first. It contains:
    - Iterate until `make linter` passes with no errors
    - Do NOT run `git add`, `git commit`, or `git commit --amend` yourself -- the deterministic commit script handles all git operations (see step 6)
 
-6. **CREATE COMMIT (deterministic).** Once all file changes are complete and linting passes, determine the commit subject by reading AGENTS.md for the required format. Then prepare the commit body: include a brief description of changes, and if you identified transitive dependencies not already in the repository, add a `Transitive dependencies:` section listing one per line. Write the body to `/tmp/commit-body.txt`, then run the deterministic commit script:
+6. **CREATE COMMIT (deterministic).** Once all file changes are complete and linting passes, determine the commit subject by reading AGENTS.md for the required format. Then prepare the commit body: include a brief description of changes, and if you identified transitive dependencies not already in the repository, add a `Transitive dependencies:` section listing one per line. Write the body to `/workspace/_run/commit-body.txt`, then run the deterministic commit script:
 
    ```bash
    bash "${CLAUDE_SKILL_DIR}/../deterministic-commit/scripts/commit.sh" \
      --ticket "<builder_ticket>" \
      --subject "<subject per AGENTS.md format>" \
-     --body-file /tmp/commit-body.txt \
+     --body-file /workspace/_run/commit-body.txt \
      --lint-cmd "make linter"
    ```
 

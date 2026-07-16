@@ -73,13 +73,13 @@ Field details:
    - Iterate until `make linter` passes with no errors
    - Do NOT run `git add`, `git commit`, or `git commit --amend` yourself -- the deterministic commit script handles all git operations (see step 6)
 
-6. **CREATE COMMIT (deterministic).** Once all file changes are complete and linting passes, prepare the commit body: include the `summary` content from the context, and append the `builder_mr_dependency` value if non-empty. Write the body to `/tmp/commit-body.txt`, then run the deterministic commit script:
+6. **CREATE COMMIT (deterministic).** Once all file changes are complete and linting passes, prepare the commit body: include the `summary` content from the context, and append the `builder_mr_dependency` value if non-empty. Write the body to `/workspace/_run/commit-body.txt`, then run the deterministic commit script:
 
    ```bash
    bash "${CLAUDE_SKILL_DIR}/../deterministic-commit/scripts/commit.sh" \
      --ticket "<pipeline_ticket>" \
      --subject "<pipeline_ticket>: add package <package_name> into 'onboarding' collection" \
-     --body-file /tmp/commit-body.txt \
+     --body-file /workspace/_run/commit-body.txt \
      --lint-cmd "make linter"
    ```
 
