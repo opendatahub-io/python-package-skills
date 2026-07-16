@@ -7,6 +7,7 @@ AI skills for Python package onboarding into Red Hat's AI package distribution p
 | Skill | Description |
 |---|---|
 | [builder-onboarding](skills/builder-onboarding/) | Configure a Python package in the RHAI builder repository |
+| [deterministic-commit](skills/deterministic-commit/) | Deterministic git commit with staging, message formatting, and trailers |
 | [executive-summary](skills/executive-summary/) | Generate a 2-3 line executive summary of a packaging analysis |
 | [failure-analysis](skills/failure-analysis/) | Analyze a Python package build failure from log output |
 | [jira-context-summary](skills/jira-context-summary/) | Summarize Jira ticket context for downstream pipeline steps |
@@ -28,6 +29,7 @@ agentic-ci Claude runner (container)
 python-package-skills (this repo, mounted as plugin)
     |
     +-- skills/builder-onboarding/
+    +-- skills/deterministic-commit/   (utility: commit script for onboarding skills)
     +-- skills/executive-summary/
     +-- skills/failure-analysis/
     +-- skills/jira-context-summary/

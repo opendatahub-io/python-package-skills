@@ -57,14 +57,20 @@ Read `/workspace/_context/probe-test-context.json` first. It contains:
    - Run `python scripts/probe_test_linter.py`, `ruff check .`, and `ruff format .` after each change
    - Fix any errors and re-run all three
    - Iterate until all linters pass with no errors
-   - Once linting passes, stage ALL changes including new files with `git add -A -- . :!_run` and commit with `git commit -a`. Do not stage the `_run/` directory (it contains runtime telemetry artifacts).
-   - After committing, run all linters one final time. If they modified any files, amend the commit with `git commit -a --amend --no-edit` to capture those changes. Repeat until the working tree is clean after linting.
+   - Do NOT run `git add`, `git commit`, or `git commit --amend` yourself -- the deterministic commit script handles all git operations (see step 6)
 
-6. **COMMIT MESSAGE FORMAT:**
-   - Format: `<probe_test_ticket>: add probe tests for <package_name>`
-   - Trailer: Add `Closes: <probe_test_ticket>` as the last line of the commit message (use the ticket from context)
+6. **CREATE COMMIT (deterministic).** Once all file changes are complete and linting passes, run the deterministic commit script:
 
-7. **COMMIT IS MANDATORY.** You MUST produce a git commit before finishing. If you do not commit, your work is lost and the onboarding fails. Never finish without a commit. The working tree MUST be clean (no uncommitted changes) when you are done. Verify with `git status` and `git log -1` after committing.
+   ```bash
+   bash "${CLAUDE_SKILL_DIR}/../deterministic-commit/scripts/commit.sh" \
+     --ticket "<probe_test_ticket>" \
+     --subject "<probe_test_ticket>: add probe tests for <package_name>" \
+     --lint-cmd "python scripts/probe_test_linter.py && ruff check . && ruff format ."
+   ```
+
+   The script handles staging (`git add -A -- . :!_run`), trailer insertion (`Closes: <ticket>`), and post-linter amend loops automatically. Do NOT run any git commands manually.
+
+7. **COMMIT IS MANDATORY.** The deterministic commit script must succeed. If it fails, diagnose and fix the issue (e.g., linting errors in your changes), then re-run the script. A missing commit is a failure.
 
 8. **SINGLE PACKAGE ONLY.** Only create probe tests for the package from the context. Do NOT add tests for any transitive dependencies or other packages, even if the analysis mentions them.
 
