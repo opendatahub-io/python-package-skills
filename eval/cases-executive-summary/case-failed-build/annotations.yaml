@@ -1,0 +1,6 @@
+notes: >-
+  Tests a failed build outcome. The summary should mention the failure,
+  identify the root cause (missing OpenSSL headers), and suggest a next
+  step (install openssl-devel or add build dependency).
+expected_tone: negative
+expected_keywords: "failed OpenSSL headers native-crypto build dependency"

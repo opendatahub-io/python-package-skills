@@ -1,9 +1,9 @@
 ---
 name: jira-context-summary
 description: >-
-  Summarize Jira ticket context for a Python package onboarding request.
-  Extracts actionable packaging requirements, recent decisions, and known
-  blockers from chronological Jira comments into a concise summary.
+  Use when you need to extract actionable requirements, decisions, and blockers
+  from Jira ticket comments for a Python package onboarding request. Produces
+  a structured summary with four sections.
 allowed-tools: Read
 metadata:
   author: ODH

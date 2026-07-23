@@ -1,9 +1,9 @@
 ---
 name: executive-summary
 description: >-
-  Create a concise executive summary of a package onboarding outcome.
-  Summarizes the build result, root cause of any failure, and key next step
-  in 2-3 lines of plain prose.
+  Use when you need a concise 2-3 line plain-prose summary of a package
+  onboarding outcome for reporting or ticket updates. Summarizes the build
+  result, root cause of any failure, and key next step.
 allowed-tools: Read
 metadata:
   author: ODH
