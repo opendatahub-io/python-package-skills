@@ -1,0 +1,9 @@
+{
+  "builder_ticket": "AIPCC-99001",
+  "package_name": "text-utils",
+  "package_info": "Name: text-utils\nVersion: 1.2.0\nSummary: Pure Python text processing utilities\nHome-page: https://github.com/example/text-utils\nLicense: MIT\nRequires-Python: >=3.9\nRequires-Dist: none",
+  "analysis": "Simple pure-Python package with no native dependencies. No C extensions, no Cython, no CFFI. Build system: setuptools with pyproject.toml. Source build should succeed without any additional system packages. No accelerator dependencies detected.",
+  "failure_summary": "",
+  "jira_context": "Onboard text-utils 1.2.0 to the builder. Pure Python package, no special requirements.",
+  "mirror_section": ""
+}

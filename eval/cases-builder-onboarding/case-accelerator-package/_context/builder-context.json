@@ -1,0 +1,9 @@
+{
+  "builder_ticket": "AIPCC-99002",
+  "package_name": "gpu-compute",
+  "package_info": "Name: gpu-compute\nVersion: 0.3.1\nSummary: GPU-accelerated computation library\nHome-page: https://github.com/example/gpu-compute\nLicense: Apache-2.0\nRequires-Python: >=3.9\nRequires-Dist: nvidia-cuda-runtime-cu12",
+  "analysis": "Package with CUDA dependency (nvidia-cuda-runtime-cu12). Contains C extensions that link against CUDA libraries. Build requires CUDA toolkit headers. Should be added to both CPU and CUDA variants as the build output differs across stacks.",
+  "failure_summary": "Initial build failed: nvcc not found. CUDA toolkit headers required for compilation.",
+  "jira_context": "Onboard gpu-compute 0.3.1 to the builder. Package requires CUDA for GPU kernels.",
+  "mirror_section": ""
+}

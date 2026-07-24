@@ -1,0 +1,8 @@
+notes: >-
+  Tests onboarding a simple pure-Python package with no C extensions
+  or accelerator dependencies. Should be placed in CPU variant only
+  with source-based build configuration.
+expected_placement: "cpu only"
+expected_build_strategy: "source"
+expected_ticket: "AIPCC-99001"
+expected_package: "text-utils"
