@@ -1,0 +1,8 @@
+notes: >-
+  Tests onboarding a package without a version pin. Should create
+  requirements files for all 3 variants with an unpinned specifier
+  and the tracking comment.
+expected_file_count: 3
+expected_specifier: "simple-lib"
+expected_ticket: "AIPCC-99011"
+expected_package: "simple-lib"

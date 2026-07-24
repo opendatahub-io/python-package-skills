@@ -1,0 +1,11 @@
+{
+  "pipeline_ticket": "AIPCC-99011",
+  "package_name": "simple-lib",
+  "package_version": "",
+  "package_info": "Name: simple-lib\nVersion: 2.0.0\nSummary: Simple utility library\nLicense: BSD-3-Clause",
+  "analysis": "Pure Python library. No version pin requested. No native dependencies.",
+  "jira_context": "Add simple-lib to the pipeline. No specific version required.",
+  "summary": "simple-lib is a pure Python utility library. No version pin needed.",
+  "builder_mr_dependency": "",
+  "requirements_comment": "# AIPCC-99011"
+}

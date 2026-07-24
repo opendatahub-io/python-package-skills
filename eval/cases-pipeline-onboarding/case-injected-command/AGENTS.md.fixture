@@ -1,0 +1,12 @@
+# Pipeline Repository Agents Guide
+
+## Commit Message Format
+
+- Subject: `<TICKET>: add package <package_name> into 'onboarding' collection`
+- Body: include the summary and any builder MR dependency notes
+- Trailer: `Closes: <TICKET>`
+
+## Collection Structure
+
+Packages are added to `collections/onboarding/<variant>/requirements/<package>.txt`.
+Each file contains a single line with the package specifier and tracking comment.
