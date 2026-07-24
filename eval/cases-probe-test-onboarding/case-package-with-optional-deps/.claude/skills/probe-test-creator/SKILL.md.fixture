@@ -1,0 +1,26 @@
+---
+name: probe-test-creator
+description: Guide for creating probe tests
+---
+
+# Probe Test Creator
+
+## Test File Structure
+
+- File name: `tests/test_<package_name>.py` (replace hyphens with underscores)
+- Import the package INSIDE each test function, never at module level
+- Each test function should be independent
+- Use simple assertions: assert result is not None, isinstance checks
+
+## Example
+
+```python
+def test_import():
+    import example_package
+    assert example_package is not None
+
+def test_basic_function():
+    from example_package import some_function
+    result = some_function()
+    assert result is not None
+```

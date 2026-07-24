@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+"""Minimal probe test linter stub for eval."""
+import sys
+sys.exit(0)

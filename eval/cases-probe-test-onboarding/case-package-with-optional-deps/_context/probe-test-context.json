@@ -1,0 +1,8 @@
+{
+  "probe_test_ticket": "AIPCC-99021",
+  "package_name": "data-plotter",
+  "builder_ticket": "AIPCC-99002",
+  "package_info": "Name: data-plotter\nVersion: 0.5.0\nSummary: Data visualization library\nLicense: MIT\nRequires-Python: >=3.9\nModules: data_plotter\nOptional dependencies: matplotlib (for advanced plots)\nKey functions: plot_bar(), plot_line(), export_csv()",
+  "analysis": "Data visualization package. Main module: data_plotter. Core functions work without optional deps. Advanced plotting requires matplotlib (optional). Key functions: plot_bar(data) -> Figure, plot_line(data) -> Figure, export_csv(data, path) -> None.",
+  "jira_context": "Create probe tests for data-plotter. Note: matplotlib is an optional dependency."
+}
