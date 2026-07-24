@@ -1,0 +1,7 @@
+notes: >-
+  Tests onboarding a package that depends on CUDA. Should be placed
+  in both CPU and CUDA variants since it has accelerator dependencies.
+expected_placement: "cpu and cuda"
+expected_build_strategy: "source"
+expected_ticket: "AIPCC-99002"
+expected_package: "gpu-compute"
