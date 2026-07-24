@@ -1,0 +1,15 @@
+# Wheels Test Repository
+
+Probe tests for Python packages in the RHAI pipeline.
+
+## Structure
+
+- `tests/` -- probe test files, one per package
+- `scripts/` -- linter and utility scripts
+- `conftest.py` -- shared pytest configuration
+
+## Writing Tests
+
+- One test file per package: `tests/test_<package_name>.py`
+- Import packages inside test functions, not at module level
+- Test basic import, key functions, and expected types

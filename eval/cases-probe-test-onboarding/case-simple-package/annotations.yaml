@@ -1,0 +1,6 @@
+notes: >-
+  Tests creating probe tests for a simple pure-Python package.
+  Should create test files with function-level imports following
+  existing repository patterns.
+expected_ticket: "AIPCC-99020"
+expected_package: "text-utils"
