@@ -1,0 +1,4 @@
+{
+  "package_name": "simple-pkg",
+  "jira_context": "[2026-01-15 09:30 - alice@redhat.com]\nRequesting onboarding of simple-pkg version 2.3.x into the RHAI collection. This is a pure Python package with no native extensions. Required for the data-processing pipeline.\n\n[2026-01-16 14:22 - bob@redhat.com]\nApproved for onboarding. Please target Python 3.11+ only as we are dropping 3.10 support in Q2. License is BSD-3-Clause, already cleared by legal.\n\n[2026-01-17 10:05 - alice@redhat.com]\nConfirmed: will onboard simple-pkg 2.3.4 (latest stable) for Python 3.11+ only. No native extensions, so no platform-specific builds needed. Will submit PR this week."
+}

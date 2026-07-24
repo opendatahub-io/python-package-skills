@@ -1,0 +1,11 @@
+notes: >-
+  Tests a ticket where later comments contradict earlier ones. Version
+  was initially pinned to 4.1.0 then changed to 4.2.x. A blocker was
+  raised then resolved. The skill must apply latest-wins and reflect
+  the resolved state.
+expected_sections:
+  - Ticket overview
+  - Key requirements
+  - Recent updates
+  - Known blockers
+expected_requirements: "version 4.2.x (not 4.1.0), CUDA support needed, blocker resolved"

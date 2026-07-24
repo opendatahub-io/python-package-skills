@@ -1,0 +1,10 @@
+notes: >-
+  Tests a straightforward ticket with 3 clear chronological comments.
+  Requirements are unambiguous. The skill should extract all requirements
+  cleanly with no conflicting information to resolve.
+expected_sections:
+  - Ticket overview
+  - Key requirements
+  - Recent updates
+  - Known blockers
+expected_requirements: "version 2.3.x, Python 3.11+ only, no native extensions"
