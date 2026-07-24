@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "License Check Verdict",
+  "description": "Machine-readable license compatibility verdict from the license-check skill. Consumed by package-onboarding via load_license_verdict.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "license", "compatible", "reason"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["compatible", "incompatible", "unknown"],
+      "description": "License redistribution assessment outcome."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "SPDX license identifier (or Unknown when undetermined)."
+    },
+    "compatible": {
+      "type": "boolean",
+      "description": "true only when verdict is compatible; false for incompatible or unknown."
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One-sentence explanation of the assessment."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "verdict": { "const": "compatible" } },
+        "required": ["verdict"]
+      },
+      "then": {
+        "properties": { "compatible": { "const": true } }
+      },
+      "else": {
+        "properties": { "compatible": { "const": false } }
+      }
+    }
+  ]
+}

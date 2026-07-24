@@ -1,0 +1,6 @@
+notes: >-
+  Package with a GPL-3.0-only LICENSE file. Expected incompatible redistribution
+  verdict with compatible=false.
+expected_verdict: incompatible
+expected_license: GPL-3.0-only
+expected_compatible: false

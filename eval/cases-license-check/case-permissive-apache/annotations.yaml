@@ -1,0 +1,6 @@
+notes: >-
+  Package with a clear Apache-2.0 LICENSE file and source_url pointing at a
+  mock repository. Expected compatible redistribution verdict.
+expected_verdict: compatible
+expected_license: Apache-2.0
+expected_compatible: true

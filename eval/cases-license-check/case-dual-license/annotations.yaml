@@ -1,0 +1,7 @@
+notes: >-
+  Dual-licensed MIT OR Apache-2.0 package. Expected compatible verdict; reason
+  should mention dual licensing and a permissive SPDX option.
+expected_verdict: compatible
+expected_license: MIT OR Apache-2.0
+expected_compatible: true
+expected_reason_keywords: dual

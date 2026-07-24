@@ -1,0 +1,6 @@
+notes: >-
+  No source_url and no license evidence available (PyPI/finder blocked in
+  eval). Expected unknown verdict with compatible=false.
+expected_verdict: unknown
+expected_license: Unknown
+expected_compatible: false
