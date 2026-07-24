@@ -1,0 +1,4 @@
+{
+  "package_name": "mystery-crash",
+  "log_excerpt": "Collecting mystery-crash==1.0.0\n  Downloading mystery_crash-1.0.0.tar.gz (45 kB)\n  Installing build dependencies ... done\n  Building wheel for mystery-crash (pyproject.toml) ... error\n  error: subprocess-exited-with-error\n\n  × Building wheel for mystery-crash (pyproject.toml) did not run successfully.\n  │ exit code: -11\n  ╰─> [8 lines of output]\n      running bdist_wheel\n      running build_ext\n      DeprecationWarning: pkg_resources is deprecated as an API\n      WARNING: Cython version mismatch, recompiling sources\n      /tmp/pip-build-env/lib/python3.11/site-packages/setuptools/_distutils/cmd.py:66: SetuptoolsDeprecationWarning\n      building 'mystery_crash._core' extension\n      gcc -fPIC -I/usr/include/python3.11 ...\n      Segmentation fault (core dumped)\n      [end of output]\n\n  note: This error originates from a subprocess, and is likely not..."
+}
