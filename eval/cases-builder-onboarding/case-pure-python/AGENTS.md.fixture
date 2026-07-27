@@ -1,0 +1,17 @@
+# Builder Repository Agents Guide
+
+## Commit Message Format
+
+- Subject: `<TICKET>: <short description>`
+- Body: explain what was done and why
+- Trailer: `Closes: <TICKET>`
+
+## Package Placement Rules
+
+- Default: add to CPU variant for the latest torch version
+- Only add to CUDA/ROCm if the package depends on an accelerator stack
+- Collection path: `collections/onboarding/<variant>/requirements/<package>.in`
+
+## Linting
+
+Run `make linter` before committing. Fix all errors.

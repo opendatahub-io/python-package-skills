@@ -1,0 +1,8 @@
+notes: >-
+  Tests onboarding a package with optional CUDA acceleration. Should be
+  placed in both CPU and CUDA variants since the build output differs
+  across stacks (pure-Python fallback on CPU, CUDA extension on GPU).
+expected_placement: "cpu and cuda"
+expected_build_strategy: "source"
+expected_ticket: "AIPCC-99002"
+expected_package: "gpu-compute"
