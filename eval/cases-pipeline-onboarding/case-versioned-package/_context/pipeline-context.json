@@ -1,0 +1,11 @@
+{
+  "pipeline_ticket": "AIPCC-99010",
+  "package_name": "text-utils",
+  "package_version": "1.2.0",
+  "package_info": "Name: text-utils\nVersion: 1.2.0\nSummary: Pure Python text processing utilities\nLicense: MIT",
+  "analysis": "Simple pure-Python package. No native dependencies. Source build succeeds.",
+  "jira_context": "Add text-utils 1.2.0 to the pipeline onboarding collection.",
+  "summary": "text-utils 1.2.0 is a pure Python package. Source build succeeds without additional dependencies.",
+  "builder_mr_dependency": "",
+  "requirements_comment": "# AIPCC-99010"
+}
