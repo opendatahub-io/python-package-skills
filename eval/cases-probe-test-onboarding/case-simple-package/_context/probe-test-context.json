@@ -1,0 +1,8 @@
+{
+  "probe_test_ticket": "AIPCC-99020",
+  "package_name": "text-utils",
+  "builder_ticket": "AIPCC-99001",
+  "package_info": "Name: text-utils\nVersion: 1.2.0\nSummary: Pure Python text processing utilities\nHome-page: https://github.com/example/text-utils\nLicense: MIT\nRequires-Python: >=3.9\nModules: text_utils\nKey functions: clean_text(), tokenize(), normalize()",
+  "analysis": "Simple pure-Python package. Main module: text_utils. Key functions: clean_text(str) -> str, tokenize(str) -> list[str], normalize(str) -> str. No optional dependencies. No C extensions.",
+  "jira_context": "Create probe tests for text-utils. Basic import and function tests needed."
+}
