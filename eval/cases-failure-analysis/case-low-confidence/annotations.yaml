@@ -1,0 +1,6 @@
+notes: >-
+  Tests a truncated, ambiguous log where the root cause is unclear.
+  The skill should use Low confidence since the log is incomplete and
+  shows multiple unrelated warnings before a generic segfault.
+expected_root_cause: "segfault segmentation fault unclear truncated"
+expected_confidence: "Low"

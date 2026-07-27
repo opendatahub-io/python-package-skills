@@ -1,0 +1,7 @@
+notes: >-
+  Tests a log with multiple potential failure signals: a missing header,
+  a pip download timeout, and deprecation warnings. The skill must identify
+  the primary root cause and should report Medium or Low confidence due
+  to the ambiguity.
+expected_root_cause: "numpy header openblas lapack"
+expected_confidence: "Medium"

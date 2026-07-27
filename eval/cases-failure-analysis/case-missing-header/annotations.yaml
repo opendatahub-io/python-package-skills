@@ -1,0 +1,6 @@
+notes: >-
+  Tests a clear single-cause failure: missing Python development headers.
+  The log contains a definitive gcc error pointing to Python.h. The skill
+  should identify this with High confidence.
+expected_root_cause: "python-devel python3-devel Python.h development headers"
+expected_confidence: "High"
