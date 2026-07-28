@@ -1,0 +1,6 @@
+notes: >-
+  Tests creating probe tests for a package with optional dependencies
+  (matplotlib). Tests should handle optional imports gracefully with
+  try/except or pytest.importorskip.
+expected_ticket: "AIPCC-99021"
+expected_package: "data-plotter"

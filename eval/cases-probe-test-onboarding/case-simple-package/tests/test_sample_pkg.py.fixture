@@ -1,0 +1,13 @@
+"""Probe tests for sample-pkg."""
+
+
+def test_import():
+    """Test that sample_pkg can be imported."""
+    import sample_pkg
+    assert sample_pkg is not None
+
+
+def test_version():
+    """Test that version is accessible."""
+    from sample_pkg import __version__
+    assert isinstance(__version__, str)
