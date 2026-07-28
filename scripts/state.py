@@ -98,7 +98,7 @@ def cmd_set(state_file: Path, key: str, value: str) -> int:
         state[key] = value.lower() == "true"
     elif value.isdigit():
         state[key] = int(value)
-    elif value.startswith("[") or value.startswith("{"):
+    elif value.startswith(("[", "{")):
         try:
             state[key] = json.loads(value)
         except json.JSONDecodeError:

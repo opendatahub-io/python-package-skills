@@ -106,11 +106,13 @@ The expected test file at `tests/test_text_utils.py`:
 ````python
 def test_import():
     import text_utils
+
     assert text_utils is not None
 
 
 def test_clean_text():
     from text_utils import clean_text
+
     result = clean_text("  hello  ")
     assert isinstance(result, str)
 ````
