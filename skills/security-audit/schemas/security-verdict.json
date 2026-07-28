@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Security Audit Verdict",
+  "description": "Machine-readable security audit verdict from the security-audit skill. Consumed by package-onboarding via load_security_verdict.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "risk_rating", "summary", "findings"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["passed", "blocked"],
+      "description": "Pipeline gate outcome derived from risk_rating."
+    },
+    "risk_rating": {
+      "type": "string",
+      "enum": ["no_issues", "low_risk", "needs_review", "critical"],
+      "description": "Overall security risk rating from worst-case sub-audit precedence."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Brief human-readable summary of the audit outcome."
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "List of finding descriptions; empty when there are no issues."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "risk_rating": { "enum": ["no_issues", "low_risk"] }
+        },
+        "required": ["risk_rating"]
+      },
+      "then": {
+        "properties": { "verdict": { "const": "passed" } }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "risk_rating": { "enum": ["needs_review", "critical"] }
+        },
+        "required": ["risk_rating"]
+      },
+      "then": {
+        "properties": { "verdict": { "const": "blocked" } }
+      }
+    }
+  ]
+}

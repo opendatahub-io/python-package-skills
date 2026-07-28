@@ -1,0 +1,11 @@
+{
+  "total": 1,
+  "findings": [
+    {
+      "path": "pkg/_native.so",
+      "match_type": "extension",
+      "suffix": ".so",
+      "size": 4096
+    }
+  ]
+}

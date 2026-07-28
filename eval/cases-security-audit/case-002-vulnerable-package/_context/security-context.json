@@ -1,0 +1,9 @@
+{
+  "package_name": "sample-vuln-pkg",
+  "git_repo": "https://github.com/example/sample-vuln-pkg",
+  "scan_outputs": {
+    "hexora": "scans/hexora-results.json",
+    "binary_scan": "scans/binary-scan.json",
+    "malcontent": "scans/malcontent-results.json"
+  }
+}

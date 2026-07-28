@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "total": 2,
+  "findings": [
+    {
+      "rule": "suspicious-eval",
+      "confidence": "high",
+      "filepath": "pkg/evil.py",
+      "message": "Use of eval() on remotely fetched content",
+      "cve": "CVE-2024-99999",
+      "severity": "critical"
+    },
+    {
+      "rule": "obfuscated-import",
+      "confidence": "high",
+      "filepath": "pkg/loader.py",
+      "message": "Base64-decoded dynamic import of subprocess",
+      "severity": "high"
+    }
+  ]
+}

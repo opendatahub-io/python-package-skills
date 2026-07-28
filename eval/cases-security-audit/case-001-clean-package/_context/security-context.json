@@ -1,0 +1,9 @@
+{
+  "package_name": "sample-clean-pkg",
+  "git_repo": "https://github.com/example/sample-clean-pkg",
+  "scan_outputs": {
+    "hexora": "scans/hexora-results.json",
+    "binary_scan": "scans/binary-scan.json",
+    "malcontent": "scans/malcontent-results.json"
+  }
+}
