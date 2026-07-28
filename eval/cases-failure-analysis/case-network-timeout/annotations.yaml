@@ -1,0 +1,6 @@
+notes: >-
+  Tests a transient infrastructure failure: network timeout during pip install.
+  No compilation error is present. The skill should identify this as a network
+  or connectivity issue with High confidence, and recommend retrying.
+expected_root_cause: "network connectivity timeout retry"
+expected_confidence: "High"
