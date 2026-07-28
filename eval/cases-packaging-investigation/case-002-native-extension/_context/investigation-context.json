@@ -1,0 +1,6 @@
+{
+  "package_name": "sample-numeric-core",
+  "package_info": "Name: sample-numeric-core\nVersion: 1.4.0\nSummary: Numeric computing core with C/Cython extensions (numpy-like)\nHome-page: https://github.com/example/sample-numeric-core\nLicense: BSD-3-Clause\nRequires-Python: >=3.10\n\nBuild:\n- Build-backend: setuptools.build_meta\n- setup.py defines ext_modules for sample_numeric_core._ufuncs (C) and sample_numeric_core._cython_blas (Cython)\n- Links against BLAS and LAPACK (OpenBLAS or system BLAS)\n- Requires C compiler (gcc/clang), Cython, and BLAS/LAPACK devel packages at build time\n- Published wheels: manylinux2014_x86_64 and macosx_11_0_arm64 (no py3-none-any)\n- Optional OpenMP for parallel ufuncs\n- Native extension package; source builds need compilers and math libraries\n",
+  "git_repo": "https://github.com/example/sample-numeric-core",
+  "jira_context": "Investigate sample-numeric-core for RHAI packaging; expect native build complexity."
+}

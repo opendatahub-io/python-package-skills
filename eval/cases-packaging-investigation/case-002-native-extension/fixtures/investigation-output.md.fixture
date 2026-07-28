@@ -1,0 +1,52 @@
+# sample-numeric-core Build Analysis
+
+## Executive summary
+
+sample-numeric-core is a **high-complexity** numeric library with **C and
+Cython extensions** that link against **BLAS/LAPACK**. Source builds require a
+C compiler, Cython, and system math libraries. Wheels are platform-specific
+(`manylinux`, `macosx`); there is no `py3-none-any` distribution.
+
+## Source Discovery
+
+- **Repository URL**: https://github.com/example/sample-numeric-core
+- **Confidence Level**: High
+- **Source Type**: Official
+- **Accessibility**: Public
+
+## Build System Analysis
+
+- **Primary Build System**: setuptools with custom `setup.py`
+- **Configuration Files**: `pyproject.toml`, `setup.py`
+- **Build Backend**: `setuptools.build_meta`
+- **Custom Build Logic**: Yes — `ext_modules` for `_ufuncs` (C) and
+  `_cython_blas` (Cython); detects BLAS/LAPACK at configure time
+- **Repository Layout**: Standard (build files at repository root)
+
+## Compilation Requirements
+
+- **Native Compilation**: Required
+- **Languages**: C, Cython
+- **Complexity Score**: 8/10
+- **Compiler Requirements**: gcc/clang, Cython
+- **System Libraries**: BLAS, LAPACK (OpenBLAS or vendor BLAS); optional OpenMP
+- **Platform Constraints**: Python >=3.10; ships `manylinux` and `macosx`
+  wheels — source builds must target matching ABIs
+
+## Dependencies Analysis
+
+### Build Dependencies
+- `setuptools`, `wheel`, `Cython`, `numpy` (build-time headers)
+
+### Runtime Dependencies
+- `numpy`
+
+### System Dependencies
+- BLAS/LAPACK development libraries for link and runtime
+- Optional OpenMP runtime for parallel ufuncs
+
+## Packaging Strategy
+
+- Prefer controlled source builds with explicit BLAS provider
+- Document manylinux / arch matrix; do not treat as pure Python
+- Ensure devel packages for BLAS/LAPACK are present in the builder image

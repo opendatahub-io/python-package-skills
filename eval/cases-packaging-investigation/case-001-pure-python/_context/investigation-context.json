@@ -1,0 +1,6 @@
+{
+  "package_name": "sample-http-client",
+  "package_info": "Name: sample-http-client\nVersion: 2.1.0\nSummary: Pure Python HTTP client library (requests-like)\nHome-page: https://github.com/example/sample-http-client\nLicense: Apache-2.0\nRequires-Python: >=3.9\nRequires-Dist: urllib3>=1.26, certifi, charset-normalizer, idna\n\nBuild:\n- Build-backend: setuptools.build_meta\n- pyproject.toml present; no setup.py ext_modules\n- No C, Cython, Rust, or Fortran sources\n- Published wheels: sample_http_client-2.1.0-py3-none-any.whl\n- No system library dependencies (no BLAS/LAPACK/OpenMP/CUDA)\n- Pure Python package; source build needs only setuptools and wheel\n",
+  "git_repo": "https://github.com/example/sample-http-client",
+  "jira_context": "Investigate sample-http-client for RHAI packaging onboarding."
+}

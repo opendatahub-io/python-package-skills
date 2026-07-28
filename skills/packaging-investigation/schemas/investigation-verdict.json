@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Packaging Investigation Verdict",
+  "description": "Machine-readable packaging investigation verdict from the packaging-investigation skill. Consumed by package-onboarding via load_investigation_verdict.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "complexity_score", "observations"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["completed", "failed"],
+      "description": "Whether the packaging investigation finished successfully."
+    },
+    "complexity_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Packaging complexity from 0 (pure Python, trivial) to 10 (extreme native deps / platform-specific builds). Must be 0 when verdict is failed."
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": ".*\\S.*"
+      },
+      "description": "Key findings or failure reasons discovered during investigation (non-whitespace strings)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "verdict": { "const": "failed" } },
+        "required": ["verdict"]
+      },
+      "then": {
+        "properties": { "complexity_score": { "const": 0 } }
+      }
+    }
+  ]
+}
