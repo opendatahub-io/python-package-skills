@@ -1,0 +1,8 @@
+notes: >-
+  Tests onboarding a package with a specific version pin. Should create
+  requirements files for all 3 collection variants with the correct
+  version-pinned specifier and tracking comment.
+expected_file_count: 3
+expected_specifier: "text-utils==1.2.0"
+expected_ticket: "AIPCC-99010"
+expected_package: "text-utils"
