@@ -1,0 +1,4 @@
+{
+  "package_name": "pandas-helpers",
+  "analysis": "Package pandas-helpers 1.2.0 was successfully built for all target platforms (linux-x86_64, linux-aarch64). The wheel was built using setuptools 69.0.0 with no native extensions. All 47 unit tests passed. License check cleared (Apache-2.0). Security audit found no known vulnerabilities. The package is ready for inclusion in the next collection update."
+}

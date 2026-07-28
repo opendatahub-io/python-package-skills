@@ -1,0 +1,6 @@
+notes: >-
+  Tests a successful build outcome. The summary should be positive in tone,
+  mention the build succeeded, and note no further action is needed or
+  suggest proceeding to next pipeline stage.
+expected_tone: positive
+expected_keywords: "success build passed pandas-helpers"

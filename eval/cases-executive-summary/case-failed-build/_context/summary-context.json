@@ -1,0 +1,4 @@
+{
+  "package_name": "native-crypto",
+  "analysis": "Package native-crypto 3.0.1 failed to build on linux-x86_64. The build failed during the compilation phase with 'fatal error: openssl/evp.h: No such file or directory'. The package has native C extensions that depend on OpenSSL development headers (openssl-devel / libssl-dev). The build environment did not have these headers installed. License check passed (MIT). Security audit was not completed due to the build failure. Recommended fix: add openssl-devel to the build dependencies in the pipeline configuration."
+}
