@@ -1,0 +1,7 @@
+notes: >-
+  Package with C/Cython extensions and system library dependencies
+  (numpy-like). Context shows setup.py ext_modules and BLAS/LAPACK.
+  Expected completed verdict with high complexity (score >= 6) and
+  observations mentioning native dependencies.
+expected_verdict: completed
+expected_min_complexity: 6

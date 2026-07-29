@@ -1,0 +1,6 @@
+notes: >-
+  Simple pure-Python package (requests-like). Context shows no native
+  extensions and no C code. Expected completed verdict with low complexity
+  (score <= 3) and observations mentioning pure Python.
+expected_verdict: completed
+expected_max_complexity: 3

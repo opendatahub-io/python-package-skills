@@ -1,0 +1,49 @@
+# sample-http-client Build Analysis
+
+## Executive summary
+
+sample-http-client is a **pure Python** HTTP client library with **low build
+complexity**. There are **no native compilation requirements** — the package
+contains only Python sources and publishes `py3-none-any` wheels. The
+recommended approach is a straightforward **source build** with setuptools.
+
+## Source Discovery
+
+- **Repository URL**: https://github.com/example/sample-http-client
+- **Confidence Level**: High
+- **Source Type**: Official
+- **Accessibility**: Public
+
+## Build System Analysis
+
+- **Primary Build System**: setuptools
+- **Configuration Files**: `pyproject.toml` (PEP 517/518)
+- **Build Backend**: `setuptools.build_meta`
+- **Custom Build Logic**: None — no `ext_modules`, no cmake/meson
+- **Repository Layout**: Standard (build files at repository root)
+
+## Compilation Requirements
+
+- **Native Compilation**: Not Required
+- **Languages**: None — pure Python
+- **Complexity Score**: 2/10
+- **Compiler Requirements**: None
+- **System Libraries**: None
+- **Platform Constraints**: Python >=3.9; universal `py3-none-any` wheels
+
+## Dependencies Analysis
+
+### Build Dependencies
+- `setuptools`, `wheel`
+
+### Runtime Dependencies
+- `urllib3`, `certifi`, `charset-normalizer`, `idna`
+
+### System Dependencies
+- None for building or installing this package
+
+## Packaging Strategy
+
+- Build from source with standard setuptools
+- No architecture-specific exclusions required
+- No monorepo subdirectory path needed
