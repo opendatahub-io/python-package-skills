@@ -1,0 +1,9 @@
+notes: >-
+  Clear should-trigger for packaging-investigation. Asks for enterprise
+  packaging analysis (build system, native deps, strategy) — not onboarding
+  commits or a security gate.
+expected_skill: packaging-investigation
+forbidden_skills:
+  - builder-onboarding
+  - security-audit
+  - failure-analysis

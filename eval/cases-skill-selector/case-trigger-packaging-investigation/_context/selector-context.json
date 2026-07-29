@@ -1,0 +1,3 @@
+{
+  "prompt": "Investigate the pytorch package for enterprise RHAI distribution readiness. Cover the build system, native/accelerator dependencies, platform support, and recommend a packaging strategy with a complexity verdict."
+}

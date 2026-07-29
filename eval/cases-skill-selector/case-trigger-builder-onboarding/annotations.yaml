@@ -1,0 +1,8 @@
+notes: >-
+  Clear should-trigger for builder-onboarding. Asks to configure/commit into
+  the builder repository, not pipeline collection or probe tests.
+expected_skill: builder-onboarding
+forbidden_skills:
+  - pipeline-onboarding
+  - probe-test-onboarding
+  - packaging-investigation

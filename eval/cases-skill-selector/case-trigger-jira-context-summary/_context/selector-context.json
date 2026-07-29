@@ -1,0 +1,3 @@
+{
+  "prompt": "Summarize the Jira ticket comments for this Python package onboarding request. Extract actionable packaging requirements, recent decisions, and known blockers into the four-section structured summary for downstream pipeline steps."
+}

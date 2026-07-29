@@ -1,0 +1,3 @@
+{
+  "prompt": "Create probe tests for the pandas package in this wheels-test repository. Use the package info and AI packaging analysis to determine the right import and functionality probes, then create a git commit."
+}

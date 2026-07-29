@@ -1,0 +1,8 @@
+notes: >-
+  Clear should-trigger for failure-analysis. Asks for root-cause diagnosis
+  from a build log, not a stakeholder summary.
+expected_skill: failure-analysis
+forbidden_skills:
+  - executive-summary
+  - builder-onboarding
+  - packaging-investigation

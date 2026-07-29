@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "selector-verdict.json",
+  "title": "Skill selector verdict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["selected_skill", "rationale"],
+  "properties": {
+    "selected_skill": {
+      "description": "Skill name selected, or null when none should run",
+      "type": ["string", "null"],
+      "enum": [
+        "license-check",
+        "security-audit",
+        "failure-analysis",
+        "packaging-investigation",
+        "builder-onboarding",
+        "pipeline-onboarding",
+        "probe-test-onboarding",
+        "jira-context-summary",
+        "executive-summary",
+        null
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

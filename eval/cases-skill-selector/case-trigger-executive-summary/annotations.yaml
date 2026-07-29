@@ -1,0 +1,9 @@
+notes: >-
+  Clear should-trigger for executive-summary. Asks only for a 2-3 line
+  stakeholder summary of an onboarding outcome — not failure root-cause
+  analysis or Jira comment extraction.
+expected_skill: executive-summary
+forbidden_skills:
+  - failure-analysis
+  - jira-context-summary
+  - packaging-investigation

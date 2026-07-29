@@ -1,0 +1,9 @@
+notes: >-
+  Multi-match prioritization. Ticket text mentions both GPL license concerns
+  and CVE/security findings, but the asked outcome is a security audit with
+  risk rating. Dominant intent → security-audit; license-check must not win.
+expected_skill: security-audit
+forbidden_skills:
+  - license-check
+  - packaging-investigation
+  - builder-onboarding

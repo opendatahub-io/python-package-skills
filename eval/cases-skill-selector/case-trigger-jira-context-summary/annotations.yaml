@@ -1,0 +1,8 @@
+notes: >-
+  Clear should-trigger for jira-context-summary. Asks to extract requirements
+  from Jira comments for downstream steps — not an executive outcome summary.
+expected_skill: jira-context-summary
+forbidden_skills:
+  - executive-summary
+  - packaging-investigation
+  - builder-onboarding

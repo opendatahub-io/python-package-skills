@@ -1,0 +1,14 @@
+notes: >-
+  Negative / false-trigger case. Unrelated request must not activate any
+  python-package-skills specialist (missed-fire inverse: skill must stay quiet).
+expect_no_skill: true
+forbidden_skills:
+  - license-check
+  - security-audit
+  - failure-analysis
+  - packaging-investigation
+  - builder-onboarding
+  - pipeline-onboarding
+  - probe-test-onboarding
+  - jira-context-summary
+  - executive-summary

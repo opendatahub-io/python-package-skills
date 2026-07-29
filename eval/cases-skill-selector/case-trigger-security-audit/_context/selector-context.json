@@ -1,0 +1,3 @@
+{
+  "prompt": "Run a security audit on the contoso-ml Python package before RHAI pipeline onboarding. Triage the pre-computed scan outputs and produce a risk-rated Markdown report plus machine-readable verdict."
+}

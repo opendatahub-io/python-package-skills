@@ -1,0 +1,3 @@
+{
+  "prompt": "The builder build for numpy failed overnight with a missing header error. Do not dig into the log for a full root-cause report — just write a concise 2-3 line plain-prose executive summary of the failed onboarding outcome for the Jira ticket update, including the key next step."
+}

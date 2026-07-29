@@ -1,0 +1,3 @@
+{
+  "prompt": "Assess whether the sample-apache-pkg Python package license permits redistribution in Red Hat's AI package distribution pipeline (RHAI). Identify the SPDX license and write a compatibility verdict."
+}

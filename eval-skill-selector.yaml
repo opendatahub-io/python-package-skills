@@ -1,0 +1,343 @@
+# Control-plane eval: skill description / selection accuracy (AIPCC-28036).
+#
+# Pipeline jobs invoke skills by name. This suite asks skill-selector to
+# choose from a natural-language prompt, then judges whether the right
+# skill was invoked.
+
+name: skill-selector-eval
+description: >-
+  Control-plane eval for skill description triggering and multi-skill
+  prioritization
+
+execution:
+  skill: skill-selector
+  mode: case
+  arguments: ""
+  timeout: 600
+  max_budget_usd: 2.0
+
+runner:
+  type: claude-code
+  plugin_dirs:
+    - .
+  settings:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: >-
+                python3 -c
+                "import os,subprocess,pathlib;
+                [p.rename(p.with_suffix(''))
+                 for p in pathlib.Path('.').rglob('*.fixture')
+                 if not p.is_symlink() and not p.with_suffix('').exists()];
+                subprocess.run(['git','add','-A'],check=True,capture_output=True);
+                subprocess.run(['git','commit','-q','-m','case setup','--allow-empty'],
+                check=True,capture_output=True,
+                env={**os.environ,
+                     'GIT_AUTHOR_NAME':'eval-setup','GIT_AUTHOR_EMAIL':'eval@setup',
+                     'GIT_COMMITTER_NAME':'eval-setup','GIT_COMMITTER_EMAIL':'eval@setup'})"
+
+models:
+  skill: claude-sonnet-4-6
+  judge: claude-sonnet-4-6
+
+# Multi-model matrix (AIPCC-28036 comment AC). Re-run this suite once per
+# skill model to catch model-specific trigger regressions. CLI override
+# example: --model claude-haiku-4-5
+model_matrix:
+  skill:
+    - claude-sonnet-4-6
+    - claude-haiku-4-5
+
+permissions:
+  allow:
+    - "Bash"
+    - "Read"
+    - "Write"
+    - "Grep"
+    - "Glob"
+    - "Skill"
+
+mlflow:
+  experiment: python-package-skills-eval
+
+dataset:
+  path: eval/cases-skill-selector
+  schema: |
+    Each case directory contains:
+    - input.yaml: Optional metadata (prompt lives in context).
+    - annotations.yaml: expected_skill / expect_no_skill / forbidden_skills.
+      NOT copied to workspace.
+    - _context/selector-context.json: { "prompt": "<natural language task>" }
+
+    annotations.yaml fields:
+    - notes: What this case tests (trigger / ambiguous / negative).
+    - expected_skill: packaging skill name that must be selected (string).
+    - expect_no_skill: true when no packaging skill should run.
+    - forbidden_skills: skills that must NOT be invoked.
+    - allowed_skills: optional allow-list when more than one skill is acceptable.
+  workspace:
+    files:
+      - _context
+
+inputs:
+  tools:
+    - match: Questions asked to the user via AskUserQuestion
+      prompt: |
+        Answer "yes" to confirmation questions.
+        For choice questions, pick the first option.
+
+    - match: |
+        Any interaction with Jira, whether via MCP tools (mcp__atlassian__*)
+        or Bash scripts calling the Jira API (curl to atlassian.net).
+      prompt: |
+        Block the call. Selection evals use only the static selector-context.json.
+
+    - match: Git push operations via Bash (git push)
+      prompt: Block all git push operations during evaluation.
+
+    - match: |
+        Invocations of Skill tool for packaging skills in python-package-skills
+        (license-check, security-audit, failure-analysis, packaging-investigation,
+        builder-onboarding, pipeline-onboarding, probe-test-onboarding,
+        jira-context-summary, executive-summary).
+      prompt: |
+        Acknowledge the selection for this control-plane eval. Do NOT execute
+        the selected skill body (no network, no commits, no verdict files
+        from that skill). Reply that selection was recorded, then tell the
+        agent to write .selector-verdict.json and stop.
+
+traces:
+  stdout: true
+  stderr: true
+  events: true
+  metrics: true
+
+judges:
+  - name: selector_verdict_exists
+    description: Verify .selector-verdict.json exists with required fields
+    check: |
+      import json
+      content = outputs.get("modified_files", {}).get(".selector-verdict.json")
+      if not content:
+          return False, "Verdict file .selector-verdict.json not found"
+      try:
+          data = json.loads(content)
+      except json.JSONDecodeError as e:
+          return False, f"Invalid JSON: {e}"
+      if "selected_skill" not in data:
+          return False, "Missing selected_skill"
+      if not isinstance(data.get("rationale"), str) or not data.get("rationale", "").strip():
+          return False, "rationale must be a non-empty string"
+      return True, f"selected_skill={data.get('selected_skill')!r}"
+
+  # Check snippets receive (outputs, arguments) only. Annotations live at
+  # outputs["annotations"] (harness score.py). Judge if: conditions get a bare
+  # annotations name, but with __builtins__={} — do not call bool()/len()/etc.
+
+  - name: expected_skill_selected
+    if: "annotations.get('expected_skill') is not None or annotations.get('allowed_skills')"
+    description: Verdict selected_skill matches annotations.expected_skill
+    check: |
+      import json
+      annotations = outputs.get("annotations") or {}
+      content = outputs.get("modified_files", {}).get(".selector-verdict.json", "")
+      if not content:
+          return False, "No verdict file"
+      try:
+          data = json.loads(content)
+      except json.JSONDecodeError as e:
+          return False, f"Invalid JSON: {e}"
+      expected = annotations.get("expected_skill")
+      allowed = annotations.get("allowed_skills")
+      actual = data.get("selected_skill")
+      if allowed:
+          ok = list(allowed) if isinstance(allowed, list) else [allowed]
+          if actual not in ok:
+              return False, f"Expected selected_skill in {ok}, got {actual!r}"
+          return True, f"selected_skill={actual!r} in allow-list"
+      if actual != expected:
+          return False, f"Expected selected_skill={expected!r}, got {actual!r}"
+      return True, f"selected_skill matches {expected!r}"
+
+  - name: expected_skill_triggered
+    if: "annotations.get('expected_skill') is not None or annotations.get('allowed_skills')"
+    description: >-
+      Deterministic control-plane judge — Skill tool event stream contains
+      the expected packaging skill
+    check: |
+      import json
+
+      def skill_base(name):
+          # Claude Code may emit "plugin:skill-name" or bare "skill-name"
+          if not isinstance(name, str) or not name:
+              return ""
+          return name.split(":", 1)[-1]
+
+      annotations = outputs.get("annotations") or {}
+      expected = annotations.get("expected_skill")
+      allowed = annotations.get("allowed_skills")
+      targets = []
+      if allowed:
+          targets = list(allowed) if isinstance(allowed, list) else [allowed]
+      elif expected:
+          targets = [expected]
+      if not targets:
+          return True, "No expected skill targets"
+
+      events = outputs.get("events", [])
+      triggered = []
+      for ev in events:
+          if ev.get("type") != "assistant":
+              continue
+          for tool in ev.get("tools", []):
+              name = tool.get("name") or ""
+              if name not in ("Skill", "skill"):
+                  continue
+              inp = tool.get("input") or {}
+              skill = skill_base(
+                  inp.get("skill")
+                  or inp.get("skill_name")
+                  or inp.get("name")
+                  or ""
+              )
+              if skill:
+                  triggered.append(skill)
+
+      if not triggered:
+          # Fall back to verdict file if event shape differs across harnesses
+          content = outputs.get("modified_files", {}).get(".selector-verdict.json", "")
+          if content:
+              try:
+                  actual = json.loads(content).get("selected_skill")
+              except json.JSONDecodeError:
+                  actual = None
+              if actual in targets:
+                  return True, (
+                      f"No Skill tool events observed; verdict selected_skill="
+                      f"{actual!r} matches targets {targets}"
+                  )
+          return False, f"No Skill tool calls; expected one of {targets}"
+
+      # Primary selection = first Skill call (ignore skill-selector itself)
+      selected = [s for s in triggered if s != "skill-selector"]
+      if not selected:
+          return False, f"Only skill-selector self-invocations seen: {triggered}"
+      primary = selected[0]
+      if primary not in targets:
+          return False, (
+              f"Primary Skill call was {primary!r}, expected one of {targets}; "
+              f"all={selected}"
+          )
+      return True, f"Primary Skill call {primary!r} matches targets"
+
+  - name: no_skill_triggered
+    if: "annotations.get('expect_no_skill', False)"
+    description: No packaging skill should be invoked for negative cases
+    check: |
+      import json
+
+      def skill_base(name):
+          if not isinstance(name, str) or not name:
+              return ""
+          return name.split(":", 1)[-1]
+
+      events = outputs.get("events", [])
+      selected = []
+      for ev in events:
+          if ev.get("type") != "assistant":
+              continue
+          for tool in ev.get("tools", []):
+              if tool.get("name") not in ("Skill", "skill"):
+                  continue
+              inp = tool.get("input") or {}
+              skill = skill_base(
+                  inp.get("skill")
+                  or inp.get("skill_name")
+                  or inp.get("name")
+                  or ""
+              )
+              if skill and skill != "skill-selector":
+                  selected.append(skill)
+      if selected:
+          return False, f"Unexpected Skill calls: {selected}"
+
+      content = outputs.get("modified_files", {}).get(".selector-verdict.json", "")
+      if content:
+          try:
+              actual = json.loads(content).get("selected_skill")
+          except json.JSONDecodeError as e:
+              return False, f"Invalid JSON: {e}"
+          if actual is not None:
+              return False, f"Expected selected_skill=null, got {actual!r}"
+      return True, "No packaging skill triggered"
+
+  - name: forbidden_skills_not_triggered
+    if: "annotations.get('forbidden_skills')"
+    description: Forbidden skills must not appear in Skill tool calls or verdict
+    check: |
+      import json
+
+      def skill_base(name):
+          if not isinstance(name, str) or not name:
+              return ""
+          return name.split(":", 1)[-1]
+
+      annotations = outputs.get("annotations") or {}
+      forbidden = annotations.get("forbidden_skills") or []
+      if not isinstance(forbidden, list):
+          forbidden = [forbidden]
+      events = outputs.get("events", [])
+      hits = []
+      for ev in events:
+          if ev.get("type") != "assistant":
+              continue
+          for tool in ev.get("tools", []):
+              if tool.get("name") not in ("Skill", "skill"):
+                  continue
+              inp = tool.get("input") or {}
+              skill = skill_base(
+                  inp.get("skill")
+                  or inp.get("skill_name")
+                  or inp.get("name")
+                  or ""
+              )
+              if skill in forbidden:
+                  hits.append(skill)
+      content = outputs.get("modified_files", {}).get(".selector-verdict.json", "")
+      if content:
+          try:
+              actual = json.loads(content).get("selected_skill")
+          except json.JSONDecodeError:
+              actual = None
+          if actual in forbidden:
+              hits.append(f"verdict:{actual}")
+      if hits:
+          return False, f"Forbidden skills triggered: {hits}"
+      return True, f"None of {forbidden} triggered"
+
+  - name: cost_reasonable
+    description: Per-case cost stays under budget threshold
+    check: |
+      cost = outputs.get("metrics", {}).get("cost_usd")
+      if cost is None:
+          return True, "No cost data available"
+      threshold = 2.0
+      if cost > threshold:
+          return False, f"Cost ${cost:.2f} exceeds ${threshold:.2f}"
+      return True, f"Cost ${cost:.2f} within budget"
+
+thresholds:
+  selector_verdict_exists:
+    min_mean: 1.0
+  expected_skill_selected:
+    min_mean: 1.0
+  expected_skill_triggered:
+    min_mean: 1.0
+  no_skill_triggered:
+    min_mean: 1.0
+  forbidden_skills_not_triggered:
+    min_mean: 1.0
+  cost_reasonable:
+    min_mean: 1.0

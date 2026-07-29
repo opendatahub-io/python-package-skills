@@ -1,0 +1,9 @@
+notes: >-
+  Multi-match prioritization. Mentions a failed build (failure-analysis bait)
+  but explicitly asks for a 2-3 line stakeholder/ticket summary — the
+  executive-summary contract. failure-analysis must not win.
+expected_skill: executive-summary
+forbidden_skills:
+  - failure-analysis
+  - packaging-investigation
+  - jira-context-summary

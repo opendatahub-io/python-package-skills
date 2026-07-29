@@ -1,0 +1,8 @@
+notes: >-
+  Clear should-trigger for license-check. Prompt asks only about SPDX /
+  redistribution compatibility — no security or onboarding verbs.
+expected_skill: license-check
+forbidden_skills:
+  - security-audit
+  - builder-onboarding
+  - failure-analysis

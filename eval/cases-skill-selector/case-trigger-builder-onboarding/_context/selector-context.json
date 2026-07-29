@@ -1,0 +1,3 @@
+{
+  "prompt": "Onboard the requests package into this RHAI builder repository. Use the package info and AI packaging analysis in context to determine configuration changes, run the linter, and create a git commit."
+}

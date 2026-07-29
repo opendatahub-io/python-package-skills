@@ -1,0 +1,8 @@
+notes: >-
+  Clear should-trigger for probe-test-onboarding. Asks to create probe tests
+  in the wheels-test repository — not builder/pipeline onboarding.
+expected_skill: probe-test-onboarding
+forbidden_skills:
+  - builder-onboarding
+  - pipeline-onboarding
+  - packaging-investigation

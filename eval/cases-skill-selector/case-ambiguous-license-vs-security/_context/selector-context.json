@@ -1,0 +1,3 @@
+{
+  "prompt": "Ticket AIPCC-99999 for package shady-ml: reviewers flagged possible GPL-3.0 license text in a vendored copy and also linked three CVE advisories from the last scan. Please run the security audit and produce the risk-rated report and verdict we use as the onboarding gate. License follow-up can wait."
+}

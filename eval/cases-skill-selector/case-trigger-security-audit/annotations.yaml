@@ -1,0 +1,8 @@
+notes: >-
+  Clear should-trigger for security-audit. Dominant intent is risk-rated
+  security triage before onboarding.
+expected_skill: security-audit
+forbidden_skills:
+  - license-check
+  - packaging-investigation
+  - builder-onboarding

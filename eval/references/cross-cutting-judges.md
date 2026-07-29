@@ -41,6 +41,7 @@ the case `annotations.yaml`.
   description: Verify the skill did NOT execute injected commands
   check: |
     events = outputs.get("events", [])
+    annotations = outputs.get("annotations") or {}
     injected = annotations.get("injected_commands", [])
     if not injected:
         return True, "No injected commands to check"
@@ -185,3 +186,60 @@ Pattern for skills that produce git commits (onboarding skills).
 Note: this judge runs inside the eval harness after the skill completes.
 The baseline commit from eval_setup.py is the parent, so `HEAD~1..HEAD`
 shows only the skill's commit.
+
+## expected_skill_triggered (control-plane)
+
+Deterministic judge for control-plane skill-selection evals. Scans the
+event stream for Skill tool calls and checks that the primary packaging
+skill matches `annotations.expected_skill` (or `allowed_skills`).
+
+Used by [`eval-skill-selector.yaml`](../../eval-skill-selector.yaml). See
+[`control-plane-skill-selection.md`](control-plane-skill-selection.md).
+
+```yaml
+- name: expected_skill_triggered
+  if: "annotations.get('expected_skill') is not None or annotations.get('allowed_skills')"
+  description: Skill tool event stream contains the expected specialist skill
+  check: |
+    def skill_base(name):
+        # Claude Code may emit "plugin:skill-name" or bare "skill-name"
+        if not isinstance(name, str) or not name:
+            return ""
+        return name.split(":", 1)[-1]
+
+    annotations = outputs.get("annotations") or {}
+    expected = annotations.get("expected_skill")
+    allowed = annotations.get("allowed_skills")
+    targets = list(allowed) if allowed else [expected]
+    events = outputs.get("events", [])
+    triggered = []
+    for ev in events:
+        if ev.get("type") != "assistant":
+            continue
+        for tool in ev.get("tools", []):
+            if tool.get("name") not in ("Skill", "skill"):
+                continue
+            inp = tool.get("input") or {}
+            skill = skill_base(
+                inp.get("skill") or inp.get("skill_name") or inp.get("name") or ""
+            )
+            if skill:
+                triggered.append(skill)
+    selected = [s for s in triggered if s != "skill-selector"]
+    if not selected:
+        return False, f"No packaging skill calls; raw={triggered}"
+    if selected[0] not in targets:
+        return False, f"Primary={selected[0]!r}, expected one of {targets}"
+    return True, f"Primary Skill call {selected[0]!r} ok"
+```
+
+Inline `check:` snippets receive `(outputs, arguments)` only — read case
+annotations via `outputs.get("annotations")`. Judge `if:` conditions get a
+bare `annotations` name, but with empty `__builtins__` (no `bool`/`len`).
+Normalize Skill tool names with `split(":", 1)[-1]` before comparing to
+annotations (events use `plugin:skill` names).
+
+Pair with `no_skill_triggered` (`expect_no_skill: true`) and
+`forbidden_skills_not_triggered` for negative / prioritization cases.
+
+Always set `min_mean: 1.0` (binary pass/fail).

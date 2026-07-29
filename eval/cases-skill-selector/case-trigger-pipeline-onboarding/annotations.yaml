@@ -1,0 +1,9 @@
+notes: >-
+  Clear should-trigger for pipeline-onboarding. Asks to add the package to
+  the RHAI pipeline onboarding collection across variants — not builder or
+  probe-test repos.
+expected_skill: pipeline-onboarding
+forbidden_skills:
+  - builder-onboarding
+  - probe-test-onboarding
+  - packaging-investigation
