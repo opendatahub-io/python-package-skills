@@ -1,0 +1,9 @@
+notes: >-
+  Well-maintained package with clean pre-computed scans (no hexora findings,
+  no binaries). Expected passed verdict with no_issues or low_risk.
+expected_verdict: passed
+expected_risk_ratings:
+  - no_issues
+  - low_risk
+expected_findings_nonempty: false
+package_name: sample-clean-pkg

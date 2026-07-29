@@ -1,0 +1,7 @@
+notes: >-
+  Package with empty git_repo and no scan outputs. Skill must still produce
+  both .security-verdict.json and .security-audit-output.md from package
+  metadata only (no source clone). Any valid risk_rating/verdict pairing is
+  acceptable as long as both artifacts exist.
+require_both_artifacts: true
+package_name: metadata-only-pkg

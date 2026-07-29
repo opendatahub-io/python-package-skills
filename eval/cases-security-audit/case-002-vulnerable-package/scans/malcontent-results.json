@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "findings": [
+    {
+      "path": "pkg/_native.so",
+      "risk": "high",
+      "behaviors": [
+        "net/http-request",
+        "exec/shell-command"
+      ],
+      "rule": "suspicious-network-exec",
+      "message": "Embedded binary performs network requests and shell execution"
+    }
+  ]
+}

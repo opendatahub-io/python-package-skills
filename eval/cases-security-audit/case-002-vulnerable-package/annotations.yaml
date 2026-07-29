@@ -1,0 +1,10 @@
+notes: >-
+  Package with high-confidence hexora findings including a CVE identifier and
+  obfuscated subprocess import, plus a high-risk malcontent binary hit.
+  Expected blocked verdict with needs_review or critical and non-empty findings.
+expected_verdict: blocked
+expected_risk_ratings:
+  - needs_review
+  - critical
+expected_findings_nonempty: true
+package_name: sample-vuln-pkg
