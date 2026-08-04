@@ -1,9 +1,0 @@
-{
-  "builder_ticket": "AIPCC-99002",
-  "package_name": "gpu-compute",
-  "package_info": "Name: gpu-compute\nVersion: 0.3.1\nSummary: GPU-accelerated computation library with optional CUDA support\nHome-page: https://github.com/example/gpu-compute\nLicense: Apache-2.0\nRequires-Python: >=3.9\nRequires-Dist: nvidia-cuda-runtime-cu12; extra == \"cuda\"",
-  "analysis": "Package with optional CUDA acceleration. Builds a pure-Python fallback on CPU and a CUDA-accelerated C extension on GPU stacks. Should be added to both CPU and CUDA variants since the build output differs across stacks.",
-  "failure_summary": "Initial source build succeeded on CPU (pure-Python fallback). CUDA variant requires nvidia-cuda-runtime-cu12 for GPU-accelerated extension.",
-  "jira_context": "Onboard gpu-compute 0.3.1 to the builder. Package requires CUDA for GPU kernels.",
-  "mirror_section": ""
-}

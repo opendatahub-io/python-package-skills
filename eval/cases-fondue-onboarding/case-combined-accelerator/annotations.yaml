@@ -1,0 +1,11 @@
+notes: >-
+  Combined mode for a package with optional CUDA acceleration. Builder should
+  place in CPU and CUDA; rhai-pipeline should cover all onboarding variants.
+expected_mode: combined
+expected_commit_count: 2
+expected_placement: "cpu and cuda"
+expected_build_strategy: "source"
+expected_file_count: 3
+expected_specifier: "gpu-compute==0.3.1"
+expected_ticket: "AIPCC-99002"
+expected_package: "gpu-compute"

@@ -1,0 +1,6 @@
+# Eval stub: simulates fondue make linter / make regen.
+# Touches .gitlab-triggers.yaml only when builder/ is present (combined path).
+.PHONY: linter
+linter:
+	@if [ -d builder ]; then touch .gitlab-triggers.yaml; fi
+	@echo "Linter passed"

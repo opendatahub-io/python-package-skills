@@ -1,0 +1,9 @@
+notes: >-
+  Pipeline-only mode without a version pin. Should create requirements files
+  for all 3 variants with an unpinned specifier and tracking comment.
+expected_mode: pipeline-only
+expected_commit_count: 1
+expected_file_count: 3
+expected_specifier: "simple-lib  #"
+expected_ticket: "AIPCC-99011"
+expected_package: "simple-lib"

@@ -1,5 +1,0 @@
-# Eval stub: the real linter requires the full pipeline repo toolchain.
-# Correctness is validated by working_tree_clean and requirements judges.
-.PHONY: linter
-linter:
-	@echo "Linter passed"

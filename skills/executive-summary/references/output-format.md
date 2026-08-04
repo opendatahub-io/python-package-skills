@@ -1,7 +1,7 @@
 # executive-summary output format
 
 This document defines the output contract for the executive-summary skill.
-Downstream skills (pipeline-onboarding) consume this output via the
+Downstream skills (fondue-onboarding) consume this output via the
 `summary` field in their context JSON.
 
 ## Output file
@@ -48,6 +48,6 @@ for pipeline onboarding.
 
 ## Downstream consumers
 
-- **pipeline-onboarding**: reads this output as the `summary` field in
-  `pipeline-context.json`. The pipeline skill includes it in the commit message
-  body when adding the package to the onboarding collection.
+- **fondue-onboarding**: reads this output as the `summary` field in
+  `fondue-context.json`. The skill includes it in the rhai-pipeline commit
+  message body when adding the package to the onboarding collection.

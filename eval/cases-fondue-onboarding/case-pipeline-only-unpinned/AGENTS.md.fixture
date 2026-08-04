@@ -1,0 +1,16 @@
+# Fondue Monorepo Agents Guide
+
+## Structure
+
+- `builder/` — Fromager wheel building system
+- `rhai-pipeline/` — Production package index / onboarding collections
+
+## Commit Message Format
+
+- Subject: `<TICKET>: <short description>`
+- Body: explain what was done and why
+- Use sign-off when required by subtree AGENTS.md
+
+## Linting
+
+Run `make linter` before committing. Fix all errors.

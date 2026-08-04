@@ -1,0 +1,20 @@
+# Builder Agents Guide
+
+## Commit Message Format
+
+- Subject: `<TICKET>: add <package_name>`
+- Body: explain placement and build strategy
+- Trailer for combined onboarding: `Relates-to: <TICKET>` (pipeline commit closes)
+
+## Package Placement Rules
+
+- Find active torch collections under `builder/collections/torch-*` where
+  `cpu-ubi9/constraints.txt` contains a `torch==` pin
+- Default: add to CPU variant (`cpu-ubi9/requirements.txt`) for the highest
+  active torch collection
+- Only add to CUDA/ROCm if the package depends on an accelerator stack
+- Prefer source-based building
+
+## Linting
+
+Run `make linter` before committing. Fix all errors.
