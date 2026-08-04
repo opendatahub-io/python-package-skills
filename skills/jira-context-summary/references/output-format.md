@@ -1,7 +1,7 @@
 # jira-context-summary output format
 
 This document defines the output contract for the jira-context-summary skill.
-Downstream skills (builder-onboarding, pipeline-onboarding) consume this output
+Downstream skills (fondue-onboarding, probe-test-onboarding) consume this output
 via the `jira_context` field in their context JSON.
 
 ## Output file
@@ -87,9 +87,9 @@ Known blockers or open questions
 
 ## Downstream consumers
 
-- **builder-onboarding**: reads this output as the `jira_context` field in
-  `builder-context.json`. The builder skill uses it to understand stakeholder
-  requirements and constraints for the package.
-- **pipeline-onboarding**: reads this output as the `jira_context` field in
-  `pipeline-context.json`. The pipeline skill uses it to verify requirements
-  when creating collection files.
+- **fondue-onboarding**: reads this output as the `jira_context` field in
+  `fondue-context.json`. The skill uses it to understand stakeholder
+  requirements and constraints when configuring `builder/` and/or
+  `rhai-pipeline/`.
+- **probe-test-onboarding**: reads this output as the `jira_context` field in
+  `probe-test-context.json`. The skill uses it when creating probe tests.

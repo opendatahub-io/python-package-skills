@@ -1,7 +1,7 @@
 # failure-analysis output format
 
 This document defines the output contract for the failure-analysis skill.
-Downstream skills (builder-onboarding) consume this output via the
+Downstream skills (fondue-onboarding) consume this output via the
 `failure_summary` field in their context JSON.
 
 ## Output file
@@ -91,6 +91,6 @@ Install the `libxml2-devel` package in the build environment. Add it to the pipe
 
 ## Downstream consumers
 
-- **builder-onboarding**: reads this output as the `failure_summary` field in
-  `builder-context.json`. The builder skill uses it to understand what failed
-  and determine the correct configuration for the package.
+- **fondue-onboarding**: reads this output as the `failure_summary` field in
+  `fondue-context.json` (combined mode). The skill uses it to understand what
+  failed and determine the correct builder configuration for the package.

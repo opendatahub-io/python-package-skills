@@ -24,7 +24,7 @@ configurable threshold. Fails open when no cost data is available.
 Threshold guidance:
 - Simple skills (license-check, executive-summary): `3.0`
 - Medium skills (security-audit, failure-analysis): `3.0`
-- Complex skills (builder-onboarding, probe-test-onboarding): `5.0`
+- Complex skills (fondue-onboarding, probe-test-onboarding): `5.0`
 
 Always set `min_mean: 1.0` in thresholds (binary pass/fail).
 

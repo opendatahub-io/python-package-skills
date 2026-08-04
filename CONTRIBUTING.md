@@ -112,7 +112,7 @@ Example: `feat: add eval cases for failure-analysis skill`
 
 ### Naming
 
-- Use lowercase kebab-case for skill names: `failure-analysis`, `builder-onboarding`
+- Use lowercase kebab-case for skill names: `failure-analysis`, `fondue-onboarding`
 - Skill names follow the `<domain>-<action>` pattern
 
 ### Python

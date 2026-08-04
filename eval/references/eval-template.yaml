@@ -70,7 +70,7 @@ models:
 # field in SKILL.md and add any that need explicit permission.
 permissions:
   allow: []
-  # - "Skill"    # skills that invoke other skills (e.g. builder-onboarding)
+  # - "Skill"    # skills that invoke other skills (e.g. fondue-onboarding)
   # - "Edit"     # skills that modify files via the Edit tool
   # - "Write"    # skills that create files via the Write tool
 
