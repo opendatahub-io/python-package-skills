@@ -42,6 +42,8 @@ See `references/output-format.md` for the full output contract.
    - If lint modifies files, stage them and run `make linter` again until exit 0 and a clean tree.
    - Workflow: change files -> `make linter` -> fix/stage -> `make linter` -> repeat until clean -> commit.
 
+**Canonical name verification.** The `package_name` from context may not match the canonical Python package name. Before creating any files, verify the canonical name using the package investigation data from context. Precedence: PyPI name (if published, this is authoritative) > `pyproject.toml` `[project] name` > `setup.cfg` / `setup.py` name > internal references > context `package_name`. If the canonical name differs, use the canonical name for all filenames, settings files, requirements entries, and collection entries throughout this onboarding. The canonical name is what the built wheel will produce and what fromager resolves.
+
 3. **Mode.** If `pipeline-only`, skip steps 4–7 and go to step 8.
 
 ### Builder (combined mode only)
@@ -53,6 +55,7 @@ See `references/output-format.md` for the full output contract.
 6. **Builder workflow.**
    - Read `builder/AGENTS.md` (and root `AGENTS.md` if present); follow them.
    - Configure the package under `builder/` only (do not hand-edit `.gitlab-triggers.yaml`).
+   - If you set `resolver_dist.include_sdists: false` and `include_wheels: false` in the package settings, you must also create a `get_resolver_provider` plugin to provide alternative version resolution. Without it, fromager cannot find versions. See existing plugins (e.g. `ctranslate2.py`) in `builder/package_plugins/` as reference. Register every new plugin in `builder/pyproject.toml` under `[project.entry-points."fromager.plugins"]`.
    - Run `make linter` (rule 2). This auto-generates `.gitlab-triggers.yaml`.
    - Once lint passes and the tree is clean, stage with `git add -A -- builder/ .gitlab-triggers.yaml :!_run` and commit. Always include `.gitlab-triggers.yaml`. Never stage `rhai-pipeline/` or `_run/`.
    - After committing, run `make linter` again; amend with `git commit -a --amend --no-edit` if it modifies files. Repeat until clean.
@@ -95,6 +98,8 @@ Complete all steps in one session without stopping to describe remaining work.
 - One commit mixing both subtrees, or staging `_run/`
 - Missing any `rhai-pipeline/collections/onboarding/` variant
 - Running builder steps in `pipeline-only` mode
+- Using the trigger/repo name instead of the canonical Python package name from `pyproject.toml`/PyPI
+- Disabling `include_sdists` and `include_wheels` in resolver_dist without creating a `get_resolver_provider` plugin
 
 ## Example (pipeline-only)
 
