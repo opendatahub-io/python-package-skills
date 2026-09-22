@@ -6,7 +6,7 @@ Downstream skills (fondue-onboarding) consume this output via the
 
 ## Output file
 
-`.failure-analysis-output.md` -- written to the workspace root.
+`.failure-analysis-output.md` -- written to the current working directory.
 
 ## Required structure
 

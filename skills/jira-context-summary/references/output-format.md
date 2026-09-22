@@ -6,7 +6,7 @@ via the `jira_context` field in their context JSON.
 
 ## Output file
 
-`.jira-context-summary-output.txt` -- written to `/workspace/`.
+`.jira-context-summary-output.txt` -- written to the current working directory.
 
 ## Required structure
 

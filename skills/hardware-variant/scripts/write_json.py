@@ -4,7 +4,7 @@
 #   "jsonschema==4.23.0",
 # ]
 # ///
-"""Schema-validated JSON writer for license-check skill structured output.
+"""Schema-validated JSON writer for hardware-variant skill structured output.
 
 Validates JSON against a provided schema before writing, and coerces
 common LLM output mistakes (string-to-array, string-to-boolean, etc.).

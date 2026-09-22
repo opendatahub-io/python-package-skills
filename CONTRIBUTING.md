@@ -124,7 +124,7 @@ Example: `feat: add eval cases for failure-analysis skill`
 ### Skills
 
 - Each skill is self-contained: everything needed is in the skill directory
-- Context is passed via JSON files in `/workspace/_context/`, not template variable substitution
+- Context is passed via JSON files in `_context/` under the current working directory, not template variable substitution
 - Every SKILL.md must include `metadata.x-artifacts` declaring files/dirs the skill creates
 - Skills reference sibling files via `${CLAUDE_SKILL_DIR}`
 

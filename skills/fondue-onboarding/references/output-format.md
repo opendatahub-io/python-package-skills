@@ -1,19 +1,21 @@
 # fondue-onboarding output format
 
 This document defines the output contract for the fondue-onboarding skill.
-The output is one or two git commits in the fondue monorepo (not a file).
-Downstream CI reads the committed configuration under `builder/` and/or
-`rhai-pipeline/`.
+Successful output is one or two git commits in the fondue monorepo (not a
+file). A combined-mode fail-closed source-strategy outcome produces no commits.
+Downstream CI reads committed configuration under `builder/` and/or
+`rhai-pipeline/` when onboarding succeeds.
 
 ## Output artifact
 
 | Mode | Commits | Subtrees touched |
 |------|---------|------------------|
 | `pipeline-only` | Exactly 1 | `rhai-pipeline/` only |
-| `combined` | Exactly 2 | First: `builder/` (and optionally `.gitlab-triggers.yaml`); second: `rhai-pipeline/` |
+| `combined` (successful) | Exactly 2 | First: `builder/` (and optionally `.gitlab-triggers.yaml`); second: `rhai-pipeline/` |
+| `combined` (fail-closed source strategy) | Exactly 0 | None; remove partial changes and leave a clean tree |
 
-The working tree must be clean after the final commit (no uncommitted changes,
-no staged `_run/` directory).
+The working tree must be clean after completion (no uncommitted changes and no
+staged `_run/` directory), including a fail-closed outcome with no commits.
 
 ## Builder commit (combined mode only)
 
@@ -30,8 +32,8 @@ Relates-to: <ticket>
 ```
 
 - **Subject**: follows AGENTS.md rules (typically `<ticket>: add <package_name>`).
-- **Body**: mention the collection variant (CPU, CUDA, ROCm), build strategy
-  (source or pre-built), and notable configuration details.
+- **Body**: mention the collection variant (CPU, CUDA, ROCm), source build
+  strategy, and notable configuration details.
 - **Trailer**: `Relates-to: <ticket>` as the last line (not `Closes`).
 
 ### Expected file changes
@@ -47,8 +49,8 @@ Relates-to: <ticket>
 
 | Strategy | When to use |
 |----------|-------------|
-| Source | Default. Always attempt source-based building first. |
-| Pre-built | Last resort only, after source building is proven impossible. |
+| Source | Required for automated Path B onboarding. |
+| Pre-built | Forbidden for automated Path B onboarding. |
 
 ### Variant placement (builder)
 
@@ -112,14 +114,22 @@ git add -A -- rhai-pipeline/ :!_run
 - All changes must pass `make linter` before the final commit(s).
 - All AGENTS.md rules (architecture-specific exclusions, platform markers,
   commit format) must be followed.
+- A missing PyPI sdist or a universal metapackage wheel is not sufficient
+  justification for pre-built configuration. Use upstream source and a plugin.
+- A required source plugin must use the PEP 503-derived identifier defined by
+  the Plugin decision rule in `SKILL.md` for both its Fromager entry-point key
+  and module under `[project.entry-points."fromager.project_overrides"]`.
+- `pre_built: true` is forbidden during automated onboarding.
 - No unrelated files may be modified.
 - In combined mode, builder and rhai-pipeline changes must be in separate commits.
 
 ## Validation rules
 
-- Commit count must match mode (1 for pipeline-only, 2 for combined).
+- Commit count must match the outcome: 1 for pipeline-only, 2 for successful
+  combined onboarding, or 0 for a combined fail-closed source-strategy outcome.
 - The rhai-pipeline commit (last commit) must include a `Closes: <ticket>` trailer.
-- In combined mode, the builder commit must include a `Relates-to: <ticket>` trailer.
+- In successful combined mode, the builder commit must include a
+  `Relates-to: <ticket>` trailer.
 - The working tree must be clean after committing (`git status --porcelain` empty).
 - No files from `_run/` may appear in any commit.
 - A requirements file must exist for every variant under
@@ -129,8 +139,8 @@ git add -A -- rhai-pipeline/ :!_run
 - In combined mode, the builder package must appear only in the CPU variant unless
   it has accelerator dependencies.
 - `make linter` must exit 0 before every commit (and again after, amending if it
-  rewrites files). On the combined path it regenerates `.gitlab-triggers.yaml`,
-  which must be included in the builder commit.
+  rewrites files). On a successful combined path it regenerates
+  `.gitlab-triggers.yaml`, which must be included in the builder commit.
 
 ## Downstream consumers
 
