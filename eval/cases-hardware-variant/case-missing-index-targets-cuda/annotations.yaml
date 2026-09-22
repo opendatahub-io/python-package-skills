@@ -1,0 +1,4 @@
+notes: >-
+  Missing from CUDA and ROCm indexes still targets CUDA (prefer CUDA).
+expected_verdict: resolved
+expected_variant: cuda12.9-ubi9

@@ -1,0 +1,4 @@
+notes: >-
+  Form default "Standard (all accelerators)" maps to default_variant, not CUDA.
+expected_verdict: resolved
+expected_variant: cpu-ubi9

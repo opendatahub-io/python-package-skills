@@ -1,0 +1,4 @@
+notes: >-
+  CUDA and ROCm both required with no primary; prefer CUDA, lowest CUDA id.
+expected_verdict: resolved
+expected_variant: cuda12.9-ubi9

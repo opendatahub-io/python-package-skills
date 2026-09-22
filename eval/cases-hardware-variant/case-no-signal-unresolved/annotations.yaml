@@ -1,0 +1,4 @@
+notes: >-
+  No accelerator, CPU, or Standard signal — unresolved, not default.
+expected_verdict: unresolved
+expected_variant: null

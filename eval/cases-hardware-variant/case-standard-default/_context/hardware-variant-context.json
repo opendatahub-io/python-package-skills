@@ -1,0 +1,13 @@
+{
+  "package_name": "sample-pkg",
+  "hardware_requirements": "Standard (all accelerators)",
+  "ticket_description": "Onboard sample-pkg 1.0 into RHAI.",
+  "allowed_variants": [
+    "cpu-ubi9",
+    "cuda12.9-ubi9",
+    "cuda13.0-ubi9",
+    "rocm7.14-ubi9",
+    "spyre-ubi9"
+  ],
+  "default_variant": "cpu-ubi9"
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hardware Variant Verdict",
+  "description": "Machine-readable accelerator variant from the hardware-variant skill. Consumed by package-onboarding via load_hardware_variant_verdict.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "variant", "reason"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["resolved", "unresolved"],
+      "description": "Whether the ticket text mapped to an allowed variant."
+    },
+    "variant": {
+      "type": ["string", "null"],
+      "description": "Allowed variant id when resolved; null when unresolved."
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One-sentence explanation of the mapping."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "verdict": { "const": "resolved" } },
+        "required": ["verdict"]
+      },
+      "then": {
+        "properties": {
+          "variant": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "verdict": { "const": "unresolved" } },
+        "required": ["verdict"]
+      },
+      "then": {
+        "properties": {
+          "variant": { "type": "null" }
+        }
+      }
+    }
+  ]
+}

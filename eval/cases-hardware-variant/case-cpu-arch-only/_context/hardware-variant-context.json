@@ -1,0 +1,13 @@
+{
+  "package_name": "arch-pkg",
+  "hardware_requirements": "s390x only. CPU build.",
+  "ticket_description": "Onboard arch-pkg for IBM Z.",
+  "allowed_variants": [
+    "cpu-ubi9",
+    "cuda12.9-ubi9",
+    "cuda13.0-ubi9",
+    "rocm7.14-ubi9",
+    "spyre-ubi9"
+  ],
+  "default_variant": "cpu-ubi9"
+}

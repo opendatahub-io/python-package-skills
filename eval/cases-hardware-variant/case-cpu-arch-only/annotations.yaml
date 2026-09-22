@@ -1,0 +1,4 @@
+notes: >-
+  Architecture-only CPU request (s390x) maps to default_variant.
+expected_verdict: resolved
+expected_variant: cpu-ubi9

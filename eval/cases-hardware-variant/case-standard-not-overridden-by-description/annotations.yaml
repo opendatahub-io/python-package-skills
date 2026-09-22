@@ -1,0 +1,4 @@
+notes: >-
+  Standard hardware field must not be overridden by CUDA mention in description.
+expected_verdict: resolved
+expected_variant: cpu-ubi9

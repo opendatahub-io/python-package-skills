@@ -1,0 +1,4 @@
+notes: >-
+  Named family with zero allowed variants must be unresolved, not invented.
+expected_verdict: unresolved
+expected_variant: null

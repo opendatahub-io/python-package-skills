@@ -1,0 +1,13 @@
+{
+  "package_name": "gaudi-pkg",
+  "hardware_requirements": "Must support Gaudi",
+  "ticket_description": "Onboard gaudi-pkg for Intel Gaudi.",
+  "allowed_variants": [
+    "cpu-ubi9",
+    "cuda12.9-ubi9",
+    "cuda13.0-ubi9",
+    "rocm7.14-ubi9",
+    "spyre-ubi9"
+  ],
+  "default_variant": "cpu-ubi9"
+}

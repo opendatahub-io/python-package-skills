@@ -1,0 +1,4 @@
+notes: >-
+  CUDA 13.2 is not in allowed_variants; pick the lowest CUDA id (cuda12.9-ubi9).
+expected_verdict: resolved
+expected_variant: cuda12.9-ubi9

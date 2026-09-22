@@ -1,0 +1,13 @@
+{
+  "package_name": "multi-pkg",
+  "hardware_requirements": "Must support CUDA and ROCm",
+  "ticket_description": "Onboard multi-pkg for GPU indexes.",
+  "allowed_variants": [
+    "cpu-ubi9",
+    "cuda12.9-ubi9",
+    "cuda13.0-ubi9",
+    "rocm7.14-ubi9",
+    "spyre-ubi9"
+  ],
+  "default_variant": "cpu-ubi9"
+}

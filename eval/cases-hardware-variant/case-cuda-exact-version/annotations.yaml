@@ -1,0 +1,4 @@
+notes: >-
+  "CUDA 13" matches cuda13.0-ubi9 when that id is in allowed_variants.
+expected_verdict: resolved
+expected_variant: cuda13.0-ubi9

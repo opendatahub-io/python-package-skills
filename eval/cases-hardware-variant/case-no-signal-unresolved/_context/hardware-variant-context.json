@@ -1,0 +1,13 @@
+{
+  "package_name": "vague-pkg",
+  "hardware_requirements": "please advise",
+  "ticket_description": "Onboard vague-pkg 1.0.",
+  "allowed_variants": [
+    "cpu-ubi9",
+    "cuda12.9-ubi9",
+    "cuda13.0-ubi9",
+    "rocm7.14-ubi9",
+    "spyre-ubi9"
+  ],
+  "default_variant": "cpu-ubi9"
+}
