@@ -1,0 +1,16 @@
+notes: >-
+  Regression for a CUDA package whose PyPI project has no sdist. The skill
+  must use upstream source through a registered package plugin and must not
+  reinterpret resolver failure as authorization for a pre-built wheel. The
+  boolean signal is deliberately false so the skill must inspect the supplied
+  source-resolution evidence directly.
+expected_mode: combined
+expected_commit_count: 2
+expected_placement: "cpu and cuda"
+expected_build_strategy: "source"
+expected_file_count: 3
+expected_specifier: "transformer-engine==2.19.0"
+expected_ticket: "AIPCC-99003"
+expected_package: "transformer-engine"
+forbid_prebuilt: true
+expected_plugin: "builder/package_plugins/transformer_engine.py"

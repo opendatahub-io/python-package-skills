@@ -1,0 +1,4 @@
+.PHONY: linter
+linter:
+	@if [ -d builder ]; then touch .gitlab-triggers.yaml; fi
+	@echo "Linter passed"

@@ -1,0 +1,94 @@
+name: hardware-variant-eval
+description: Evaluate deterministic accelerator variant resolution
+skill: hardware-variant
+
+execution:
+  mode: case
+  arguments: ""
+  timeout: 900
+  max_budget_usd: 1.0
+
+runner:
+  type: claude-code
+  plugin_dirs: [.]
+  settings:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: >-
+                python3 -c
+                "import os,subprocess;
+                subprocess.run(['git','add','-A'],check=True,capture_output=True);
+                subprocess.run(['git','commit','-q','-m','case setup','--allow-empty'],
+                check=True,capture_output=True,
+                env={**os.environ,
+                     'GIT_AUTHOR_NAME':'eval-setup','GIT_AUTHOR_EMAIL':'eval@setup',
+                     'GIT_COMMITTER_NAME':'eval-setup','GIT_COMMITTER_EMAIL':'eval@setup'})"
+
+models:
+  skill: claude-haiku-4-5
+  judge: claude-sonnet-4-6
+
+permissions:
+  allow: [Bash, Read, Write]
+
+mlflow:
+  experiment: python-package-skills-eval
+
+dataset:
+  path: eval/cases-hardware-variant
+  workspace:
+    files: [_context]
+
+inputs:
+  tools:
+    - match: Questions asked to the user via AskUserQuestion
+      prompt: Answer yes and continue autonomously.
+    - match: Any network, Jira, or git operation
+      prompt: Block it. Use only the static context.
+
+outputs: []
+
+traces:
+  stdout: true
+  stderr: true
+  events: true
+  metrics: true
+
+judges:
+  - name: verdict_matches
+    description: Verdict JSON is valid and matches the expected classification
+    check: |
+      import json
+      content = outputs.get("modified_files", {}).get(
+          ".hardware-variant-verdict.json", ""
+      )
+      if not content:
+          return False, "Verdict artifact missing"
+      try:
+          data = json.loads(content)
+      except json.JSONDecodeError as exc:
+          return False, f"Invalid JSON: {exc}"
+      if set(data) != {"verdict", "variant", "reason"}:
+          return False, f"Incorrect fields: {sorted(data)}"
+      if data.get("verdict") != annotations.get("expected_verdict"):
+          return False, f"Unexpected verdict: {data.get('verdict')!r}"
+      if data.get("variant") != annotations.get("expected_variant"):
+          return False, f"Unexpected variant: {data.get('variant')!r}"
+      if not str(data.get("reason", "")).strip():
+          return False, "Reason is empty"
+      return True, "Classification matches expected verdict"
+
+  - name: only_expected_artifact
+    description: Skill modifies only its verdict artifact
+    check: |
+      modified = set(outputs.get("modified_files", {}))
+      expected = {".hardware-variant-verdict.json"}
+      if modified != expected:
+          return False, f"Unexpected modified files: {sorted(modified - expected)}"
+      return True, "Only the expected artifact was modified"
+
+thresholds:
+  verdict_matches: {min_mean: 1.0}
+  only_expected_artifact: {min_mean: 1.0}

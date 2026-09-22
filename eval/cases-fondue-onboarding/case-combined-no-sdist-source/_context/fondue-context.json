@@ -1,0 +1,16 @@
+{
+  "ticket": "AIPCC-99003",
+  "package_name": "transformer-engine",
+  "package_version": "2.19.0",
+  "package_info": "Name: transformer-engine\nVersion: 2.19.0\nSummary: NVIDIA Transformer Engine metapackage\nHome-page: https://github.com/NVIDIA/TransformerEngine\nRequires-Dist: transformer-engine-cu12==2.19.0",
+  "analysis": "PyPI publishes a universal metapackage wheel but no sdist. Buildable source is available from the NVIDIA/TransformerEngine release tag. Fromager cannot resolve the package through its default sdist resolver, so onboarding requires a registered project override that resolves and downloads upstream source. The source build has CUDA and libtorch ABI dependencies.",
+  "jira_context": "Build Transformer Engine from upstream source. Pre-built wheels are not approved.",
+  "summary": "Transformer Engine 2.19.0 must be built from the NVIDIA upstream source release with a Fromager package plugin.",
+  "requirements_comment": "# AIPCC-99003",
+  "mode": "combined",
+  "requires_source_plugin": false,
+  "source_resolution_evidence": "transformer-engine: Unable to resolve requirement specifier transformer-engine with constraint None using PyPI resolver: found no match for transformer-engine, searching for sdists, ignoring pre-release versions",
+  "failure_summary": "The default PyPI resolver found no sdist for transformer-engine. This is a source-resolution failure, not evidence that source building is impossible.",
+  "mirror_url": "",
+  "infra_mr_url": ""
+}

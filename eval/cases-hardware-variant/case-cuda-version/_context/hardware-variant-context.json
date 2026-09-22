@@ -1,0 +1,7 @@
+{
+  "package_name": "example-package",
+  "hardware_requirements": "Must support CUDA 13",
+  "description": "Onboard the package for CUDA testing.",
+  "allowed_variants": ["cpu-ubi9", "cuda12.9-ubi9", "cuda13.0-ubi9", "rocm6.4-ubi9"],
+  "default_variant": "cpu-ubi9"
+}

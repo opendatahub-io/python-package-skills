@@ -1,0 +1,18 @@
+# Fondue Monorepo Agents Guide
+
+## Structure
+
+- `builder/` — Fromager wheel building system
+- `rhai-pipeline/` — Production package index / onboarding collections
+
+## Onboarding safety
+
+- Build packages from source unless explicit legal and Product Security
+  approvals authorize a pre-built wheel.
+- If no compliant source repository, archive, or approved mirror exists,
+  remove any partial changes and stop with a clean tree and no commits.
+- Never create `pre_built: true` during automated onboarding.
+
+## Linting
+
+Run `make linter` before committing. Fix all errors.

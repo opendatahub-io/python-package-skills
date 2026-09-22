@@ -1,0 +1,7 @@
+{
+  "package_name": "example-package",
+  "hardware_requirements": "Standard (all accelerators)",
+  "description": "No special accelerator requirement.",
+  "allowed_variants": ["cpu-ubi9", "cuda13.0-ubi9", "rocm6.4-ubi9"],
+  "default_variant": "cpu-ubi9"
+}

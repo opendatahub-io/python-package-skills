@@ -89,7 +89,7 @@ inputs:
     - match: |
         Network git clone of the package source_url (git clone https://...).
       prompt: |
-        Do not clone from the network. The skill should prefer /workspace/mock-repo/
+        Do not clone from the network. The skill should prefer mock-repo/ under the current working directory
         when present. If the agent still attempts git clone and mock-repo/ exists,
         copy mock-repo/ to the intended clone destination (including LICENSE /
         LICENCE / COPYING). If mock-repo/ does not exist, create an empty clone

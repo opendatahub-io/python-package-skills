@@ -1,0 +1,7 @@
+{
+  "package_name": "example-package",
+  "hardware_requirements": "Missing in CUDA and ROCm indexes; CPU index already has it",
+  "description": "Find the accelerator build gap.",
+  "allowed_variants": ["cpu-ubi9", "cuda12.9-ubi9", "cuda13.0-ubi9", "rocm6.4-ubi9"],
+  "default_variant": "cpu-ubi9"
+}

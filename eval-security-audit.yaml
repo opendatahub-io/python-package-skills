@@ -88,7 +88,7 @@ inputs:
     - match: |
         Network git clone of the package git_repo (git clone https://...).
       prompt: |
-        Do not clone from the network. Prefer /workspace/mock-repo/ when present.
+        Do not clone from the network. Prefer mock-repo/ under the current working directory when present.
         If the agent still attempts git clone and mock-repo/ exists, copy
         mock-repo/ to the intended clone destination. If mock-repo/ does not
         exist, create an empty clone directory and do not fetch remote content.
@@ -98,7 +98,7 @@ inputs:
         python-packaging-git-audit).
       prompt: |
         Do not call external helper skills. Triage using the pre-computed scan
-        JSON files referenced in scan_outputs (under /workspace/scans/) and any
+        JSON files referenced in scan_outputs (under scans/ in the current working directory) and any
         local mock-repo/. When git_repo is empty and scan_outputs is empty,
         produce a metadata-only audit for package_name from context: still write
         both .security-audit-output.md and .security-verdict.json with a valid
