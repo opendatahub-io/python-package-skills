@@ -74,13 +74,14 @@ dataset:
     - input.yaml: Minimal metadata.
     - annotations.yaml: Ground truth for judges. NOT copied to workspace.
     - _context/fondue-context.json: The context JSON the skill reads first.
-    - *.fixture files: Activated by SessionStart hook (monorepo layout under
-      builder/ and rhai-pipeline/).
+    - *.fixture files: Activated by SessionStart hook (agent guidance under
+      .agents/, with monorepo content under builder/ and rhai-pipeline/).
 
     annotations.yaml fields:
     - notes: What this case tests.
     - expected_mode: combined or pipeline-only.
-    - expected_commit_count: 1 (pipeline-only) or 2 (combined).
+    - expected_commit_count: 0 (combined fail-closed), 1 (pipeline-only),
+      or 2 (successful combined).
     - expected_ticket: The Jira ticket key (must appear in requirements tracking comment).
     - expected_package: Package name (requirements basename must be <package>.txt).
     - expected_file_count: Exact number of added onboarding requirements files.
@@ -88,7 +89,10 @@ dataset:
         Required prefix of the requirements line. Use pkg==ver for pinned
         cases, or "pkg  #" for unpinned (rejects an unexpected pin).
     - expected_placement: Builder variant placement (combined cases).
-    - expected_build_strategy: source or pre-built (combined cases).
+    - expected_build_strategy: source, pre-built, or fail-closed (combined cases).
+    - forbid_prebuilt: Reject `pre_built: true` in the generated builder diff.
+    - expected_plugin: Required package plugin path for source-only cases.
+    - fail_closed: The combined case must stop without commits or changes.
 
   workspace:
     files:
@@ -129,6 +133,7 @@ traces:
 
 judges:
   - name: commit_exists
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify that at least one new skill commit was created
     check: |
       import subprocess
@@ -145,7 +150,7 @@ judges:
       return True, f"Found {len(skill_commits)} skill commit(s)"
 
   - name: commit_count
-    description: Verify commit count matches mode (1 pipeline-only, 2 combined)
+    description: Verify commit count matches the expected onboarding outcome
     check: |
       import subprocess
       result = subprocess.run(
@@ -162,7 +167,111 @@ judges:
           return False, f"Expected {expected} commit(s), found {len(skill_commits)}: {'; '.join(subjects)}"
       return True, f"Exactly {expected} skill commit(s)"
 
+  - name: fail_closed_no_skill_commits
+    if: "annotations.get('expected_commit_count', 1) == 0"
+    description: Verify the fail-closed outcome created no skill commits
+    check: |
+      import subprocess
+      result = subprocess.run(
+          ["git", "log", "--format=%H\t%an\t%s"],
+          capture_output=True, text=True
+      )
+      if result.returncode != 0:
+          return False, "Could not read git log"
+      skill_commits = [
+          line for line in result.stdout.splitlines()
+          if "\teval-setup\t" not in line
+      ]
+      if skill_commits:
+          subjects = [line.split("\t")[-1] for line in skill_commits[:5]]
+          return False, f"Unexpected skill commit(s): {'; '.join(subjects)}"
+      return True, "No skill commits were created"
+
+  - name: fail_closed_clean_tree
+    if: "annotations.get('expected_commit_count', 1) == 0"
+    description: Verify the fail-closed outcome leaves a clean working tree
+    check: |
+      import subprocess
+      result = subprocess.run(
+          ["git", "status", "--porcelain"],
+          capture_output=True, text=True
+      )
+      if result.returncode != 0:
+          return False, "Could not inspect working tree status"
+      if result.stdout.strip():
+          return False, f"Fail-closed working tree is dirty: {result.stdout.strip()[:200]}"
+      return True, "Fail-closed working tree is clean"
+
+  - name: fail_closed_no_monorepo_changes
+    if: "annotations.get('expected_commit_count', 1) == 0"
+    description: Verify the fail-closed outcome changed neither monorepo subtree
+    check: |
+      import subprocess
+      result = subprocess.run(
+          ["git", "log", "--format=%H\t%an\t%s"],
+          capture_output=True, text=True
+      )
+      setup_commits = [
+          line.split("\t", 1)[0]
+          for line in result.stdout.splitlines()
+          if "\teval-setup\t" in line
+      ]
+      if len(setup_commits) != 1:
+          return False, "Could not identify the eval setup commit"
+      diff = subprocess.run(
+          ["git", "diff", "--name-only", f"{setup_commits[0]}..HEAD"],
+          capture_output=True, text=True
+      )
+      if diff.returncode != 0:
+          return False, "Could not inspect changes after eval setup"
+      touched = [
+          path for path in diff.stdout.splitlines()
+          if path == "builder" or path.startswith("builder/")
+          or path == "rhai-pipeline" or path.startswith("rhai-pipeline/")
+      ]
+      if touched:
+          return False, f"Fail-closed run changed monorepo content: {', '.join(touched[:10])}"
+      return True, "Neither builder nor rhai-pipeline changed"
+
+  - name: fail_closed_no_prebuilt
+    if: "annotations.get('expected_commit_count', 1) == 0"
+    description: Verify the fail-closed outcome did not add pre-built configuration
+    check: |
+      import re
+      import subprocess
+      result = subprocess.run(
+          ["git", "log", "--format=%H\t%an\t%s"],
+          capture_output=True, text=True
+      )
+      setup_commits = [
+          line.split("\t", 1)[0]
+          for line in result.stdout.splitlines()
+          if "\teval-setup\t" in line
+      ]
+      if len(setup_commits) != 1:
+          return False, "Could not identify the eval setup commit"
+      diff = subprocess.run(
+          ["git", "diff", "--unified=0", f"{setup_commits[0]}..HEAD", "--", "builder/"],
+          capture_output=True, text=True
+      )
+      if diff.returncode != 0:
+          return False, "Could not inspect builder changes after eval setup"
+      pattern = re.compile(
+          r"^\s*pre_built\s*:\s*['\"]?(?:true|yes|on)['\"]?\s*(?:#.*)?$",
+          re.IGNORECASE,
+      )
+      added = [
+          line[1:]
+          for line in diff.stdout.splitlines()
+          if line.startswith("+") and not line.startswith("+++")
+      ]
+      violations = [line for line in added if pattern.search(line)]
+      if violations:
+          return False, "Fail-closed run added pre-built configuration: " + "; ".join(violations)
+      return True, "No pre_built: true configuration was added"
+
   - name: pipeline_commit_message
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify the rhai-pipeline commit (HEAD) has correct subject and Closes trailer
     check: |
       import subprocess
@@ -186,6 +295,7 @@ judges:
       return True, f"Pipeline commit message correct: {subject}"
 
   - name: pipeline_commit_subject_exact
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify rhai-pipeline commit subject matches full expected format
     check: |
       import subprocess
@@ -204,7 +314,7 @@ judges:
       return True, f"Subject exactly matches: {subject}"
 
   - name: builder_commit_trailer
-    if: "annotations.get('expected_mode') == 'combined'"
+    if: "annotations.get('expected_mode') == 'combined' and annotations.get('expected_commit_count', 1) > 0"
     description: Verify builder commit (HEAD~1) has Relates-to trailer
     check: |
       import subprocess
@@ -225,6 +335,7 @@ judges:
       return True, "Builder commit has Relates-to trailer"
 
   - name: requirements_files_created
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify exact onboarding requirements files were added under rhai-pipeline
     check: |
       import os
@@ -267,6 +378,7 @@ judges:
       return True, f"Added {len(req_files)} onboarding requirements files: {', '.join(sorted(req_files))}"
 
   - name: requirements_content_correct
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify each requirements file has exact specifier and tracking comment
     check: |
       import os
@@ -331,6 +443,7 @@ judges:
       return True, f"All {len(files)} files have correct specifier and tracking comment"
 
   - name: requirements_single_line
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify each requirements file contains exactly one physical line
     check: |
       import os
@@ -395,6 +508,7 @@ judges:
       return True, "Working tree is clean"
 
   - name: linter_invoked
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify make linter was invoked during the skill run
     check: |
       events = outputs.get("events", [])
@@ -412,6 +526,7 @@ judges:
       return False, "No make linter/make lint invocation found in tool events"
 
   - name: run_dir_excluded
+    if: "annotations.get('expected_commit_count', 1) > 0"
     description: Verify no _run/ files were included in skill commits
     check: |
       import subprocess
@@ -433,8 +548,72 @@ judges:
           return False, f"_run/ files in commit: {', '.join(run_files)}"
       return True, "No _run/ files in commit"
 
+  - name: unauthorized_prebuilt_rejected
+    if: "annotations.get('forbid_prebuilt', False)"
+    description: Verify the skill did not bypass source building with pre_built true
+    check: |
+      import re
+      import subprocess
+      result = subprocess.run(
+          ["git", "log", "--format=%H\t%an\t%s"],
+          capture_output=True, text=True
+      )
+      skill_hashes = [
+          line.split("\t", 1)[0]
+          for line in result.stdout.splitlines()
+          if "\teval-setup\t" not in line
+      ]
+      if not skill_hashes:
+          return True, "No skill commits; no generated pre-built configuration to inspect"
+      base = f"{skill_hashes[-1]}^"
+      result = subprocess.run(
+          ["git", "diff", "--unified=0", f"{base}..HEAD", "--", "builder/"],
+          capture_output=True, text=True
+      )
+      added = []
+      for line in result.stdout.splitlines():
+          if line.startswith("+++") or not line.startswith("+"):
+              continue
+          added.append(line[1:])
+      pattern = re.compile(
+          r"^\s*pre_built\s*:\s*['\"]?(?:true|yes|on)['\"]?\s*(?:#.*)?$",
+          re.IGNORECASE,
+      )
+      violations = [line for line in added if pattern.search(line)]
+      if violations:
+          return False, "Unauthorized pre-built configuration added: " + "; ".join(violations)
+      return True, "No unauthorized pre-built configuration"
+
+  - name: required_source_plugin
+    if: "annotations.get('expected_plugin', '') != ''"
+    description: Verify source-only packages receive and register the required package plugin
+    check: |
+      import pathlib
+      import tomllib
+      expected = annotations.get("expected_plugin", "")
+      plugin = pathlib.Path(expected)
+      if not plugin.is_file():
+          return False, f"Required source plugin is missing: {expected}"
+      pyproject = pathlib.Path("builder/pyproject.toml")
+      if not pyproject.is_file():
+          return False, "builder/pyproject.toml is missing"
+      module = plugin.stem
+      data = tomllib.loads(pyproject.read_text())
+      entries = (
+          data.get("project", {})
+          .get("entry-points", {})
+          .get("fromager.project_overrides", {})
+      )
+      expected_value = f"package_plugins.{module}"
+      if entries.get(module) != expected_value:
+          return False, (
+              f"Canonical registration must be {module} = {expected_value!r} "
+              "under fromager.project_overrides"
+          )
+      return True, f"Required source plugin has canonical registration: {expected}"
+
   - name: onboarding_quality
-    if: "annotations.get('expected_mode') == 'combined'"
+    if: "annotations.get('expected_mode') == 'combined' and annotations.get('expected_commit_count', 1) > 0"
     description: Assess overall quality of the combined onboarding commits
     prompt: |
       You are evaluating a fondue-onboarding skill that configures a Python
@@ -506,6 +685,14 @@ thresholds:
     min_mean: 1.0
   commit_count:
     min_mean: 1.0
+  fail_closed_no_skill_commits:
+    min_mean: 1.0
+  fail_closed_clean_tree:
+    min_mean: 1.0
+  fail_closed_no_monorepo_changes:
+    min_mean: 1.0
+  fail_closed_no_prebuilt:
+    min_mean: 1.0
   pipeline_commit_message:
     min_mean: 1.0
   pipeline_commit_subject_exact:
@@ -523,6 +710,10 @@ thresholds:
   linter_invoked:
     min_mean: 1.0
   run_dir_excluded:
+    min_mean: 1.0
+  unauthorized_prebuilt_rejected:
+    min_mean: 1.0
+  required_source_plugin:
     min_mean: 1.0
   onboarding_quality:
     min_mean: 3.0

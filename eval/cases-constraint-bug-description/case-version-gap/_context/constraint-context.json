@@ -1,0 +1,9 @@
+{
+  "package_name": "example-package",
+  "constraint_line": "example-package<2",
+  "constraint_source": "builder/collections/torch-2.9/cpu-ubi9/constraints.txt",
+  "latest_pypi_version": "2.1.0",
+  "index_version": "1.8.4",
+  "fondue_web_url": "https://gitlab.com/redhat/rhel-ai/wheels/fondue",
+  "build_log": "ERROR: Cannot install example-package==2.1.0 because the collection constraint requires example-package<2."
+}

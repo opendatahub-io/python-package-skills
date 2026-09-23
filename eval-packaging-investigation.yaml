@@ -95,8 +95,8 @@ inputs:
         investigator helpers.
       prompt: |
         Do not call the external python-packaging-investigator agent. A
-        pre-computed report is at /workspace/fixtures/investigation-output.md.
-        Copy that file's content to /workspace/.investigation-output.md, then
+        pre-computed report is at fixtures/investigation-output.md under the current working directory.
+        Copy that file's content to .investigation-output.md, then
         derive .investigation-verdict.json (verdict, complexity_score,
         observations) from the report and package_info in context. Validate
         with write_json.py.
@@ -113,7 +113,7 @@ inputs:
         WebFetch or WebSearch tool calls (any URL or query).
       prompt: |
         Block network fetch/search. Use only investigation-context.json and
-        /workspace/fixtures/investigation-output.md.
+        fixtures/investigation-output.md under the current working directory.
 
 traces:
   stdout: true

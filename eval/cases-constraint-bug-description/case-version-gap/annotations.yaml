@@ -1,0 +1,7 @@
+notes: Verifies the repository first-line contract and complete version-gap analysis.
+expected_repository: https://gitlab.com/redhat/rhel-ai/wheels/fondue
+expected_terms:
+  - example-package<2
+  - builder/collections/torch-2.9/cpu-ubi9/constraints.txt
+  - 2.1.0
+  - 1.8.4

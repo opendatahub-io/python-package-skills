@@ -1,0 +1,5 @@
+# RHAI Pipeline Agents Guide
+
+- Create one requirement file per onboarding variant.
+- Use the exact tracking comment from context.
+- Use `Closes: <TICKET>` on the pipeline commit.

@@ -1,0 +1,97 @@
+name: constraint-bug-description-eval
+description: Evaluate builder constraint Jira descriptions
+skill: constraint-bug-description
+
+execution:
+  mode: case
+  arguments: ""
+  timeout: 900
+  max_budget_usd: 3.0
+
+runner:
+  type: claude-code
+  plugin_dirs: [.]
+  settings:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: >-
+                python3 -c
+                "import os,subprocess;
+                subprocess.run(['git','add','-A'],check=True,capture_output=True);
+                subprocess.run(['git','commit','-q','-m','case setup','--allow-empty'],
+                check=True,capture_output=True,
+                env={**os.environ,
+                     'GIT_AUTHOR_NAME':'eval-setup','GIT_AUTHOR_EMAIL':'eval@setup',
+                     'GIT_COMMITTER_NAME':'eval-setup','GIT_COMMITTER_EMAIL':'eval@setup'})"
+
+models:
+  skill: claude-sonnet-4-6
+  judge: claude-sonnet-4-6
+
+permissions:
+  allow: [Read, Write]
+
+mlflow:
+  experiment: python-package-skills-eval
+
+dataset:
+  path: eval/cases-constraint-bug-description
+  workspace:
+    files: [_context]
+
+inputs:
+  tools:
+    - match: Questions asked to the user via AskUserQuestion
+      prompt: Answer yes and continue autonomously.
+    - match: Any network, Jira, or git operation
+      prompt: Block it. Use only the static context.
+
+outputs: []
+
+traces:
+  stdout: true
+  stderr: true
+  events: true
+  metrics: true
+
+judges:
+  - name: output_contract
+    description: Required artifact starts with the exact repository line
+    check: |
+      content = outputs.get("modified_files", {}).get(
+          ".constraint-bug-description-output.md", ""
+      )
+      expected = annotations.get("expected_repository", "")
+      if not content:
+          return False, "Output artifact missing"
+      first = content.splitlines()[0] if content.splitlines() else ""
+      if first != f"repository: {expected}":
+          return False, f"Incorrect first line: {first!r}"
+      return True, "Repository first-line contract satisfied"
+
+  - name: required_facts
+    description: Constraint, source, and both versions are preserved
+    check: |
+      content = outputs.get("modified_files", {}).get(
+          ".constraint-bug-description-output.md", ""
+      )
+      missing = [term for term in annotations.get("expected_terms", []) if term not in content]
+      if missing:
+          return False, f"Missing required terms: {missing}"
+      return True, "All required facts are present"
+
+  - name: only_expected_artifact
+    description: Skill modifies only its output artifact
+    check: |
+      modified = set(outputs.get("modified_files", {}))
+      expected = {".constraint-bug-description-output.md"}
+      if modified != expected:
+          return False, f"Unexpected modified files: {sorted(modified - expected)}"
+      return True, "Only the expected artifact was modified"
+
+thresholds:
+  output_contract: {min_mean: 1.0}
+  required_facts: {min_mean: 1.0}
+  only_expected_artifact: {min_mean: 1.0}

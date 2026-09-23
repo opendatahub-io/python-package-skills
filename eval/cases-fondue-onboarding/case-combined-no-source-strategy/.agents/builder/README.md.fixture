@@ -1,0 +1,8 @@
+# Builder Agents Guide
+
+- A package without a PyPI sdist requires a verified source
+  repository, source archive, or approved source mirror.
+- If no compliant source artifact exists, fail closed and remove all partial
+  changes. Do not create a package plugin that cannot resolve source.
+- Never use `pre_built: true` for automated onboarding.
+- Use `Relates-to: <TICKET>` on a successful builder commit.

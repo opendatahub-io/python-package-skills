@@ -1,0 +1,16 @@
+{
+  "ticket": "AIPCC-99004",
+  "package_name": "proprietary-accelerator",
+  "package_version": "1.0.0",
+  "package_info": "Name: proprietary-accelerator\nVersion: 1.0.0\nSummary: Vendor accelerator runtime\nHome-page: https://vendor.example.invalid/proprietary-accelerator\nRequires-Dist: vendor-runtime==1.0.0",
+  "analysis": "The package is distributed only as a vendor wheel. PyPI has no sdist, the vendor has published no source repository or source archive for this release, and no approved internal source mirror exists. The wheel is not approved for redistribution as a pre-built artifact. There is no compliant source-build strategy for automated onboarding.",
+  "jira_context": "Onboard proprietary-accelerator 1.0.0 into builder/ and rhai-pipeline/. Pre-built wheels are not approved, and no source artifact or approved mirror is available. Stop without changes if no compliant source strategy exists.",
+  "summary": "proprietary-accelerator 1.0.0 cannot be onboarded automatically because no compliant source strategy exists.",
+  "requirements_comment": "# AIPCC-99004",
+  "mode": "combined",
+  "requires_source_plugin": false,
+  "source_resolution_evidence": "Default PyPI resolver found no sdist for proprietary-accelerator. Vendor source repository: unavailable. Source archive: unavailable. Approved mirror_url: empty.",
+  "failure_summary": "No compliant source strategy exists: only an unapproved pre-built wheel is available, with no upstream source, source archive, or approved mirror.",
+  "mirror_url": "",
+  "infra_mr_url": ""
+}

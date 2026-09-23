@@ -1,0 +1,12 @@
+notes: >-
+  Fail-closed regression for a combined-mode package with no compliant source
+  strategy. The package has no sdist, source repository, source archive, or
+  approved mirror. The skill must not create a pre-built configuration or
+  partial builder and pipeline changes.
+expected_mode: combined
+expected_commit_count: 0
+expected_build_strategy: fail-closed
+expected_ticket: AIPCC-99004
+expected_package: proprietary-accelerator
+forbid_prebuilt: true
+fail_closed: true

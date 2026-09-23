@@ -1,0 +1,8 @@
+# Builder Agents Guide
+
+- Build packages from source unless explicit legal and Product Security
+  approvals authorize a pre-built wheel.
+- A package without a PyPI sdist requires a source resolver/download plugin.
+- Register package plugins in `builder/pyproject.toml`.
+- Add accelerator packages to CPU and their accelerator variant.
+- Use `Relates-to: <TICKET>` on the builder commit.

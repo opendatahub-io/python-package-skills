@@ -1,0 +1,7 @@
+# RHAI Pipeline Agents Guide
+
+- Create one requirement file per onboarding variant only after a successful
+  builder strategy is established.
+- Use the exact tracking comment from context.
+- Use `Closes: <TICKET>` on a successful pipeline commit.
+- Do not create pipeline changes when combined onboarding fails closed.
