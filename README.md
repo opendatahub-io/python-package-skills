@@ -6,9 +6,11 @@ AI skills for Python package onboarding into Red Hat's AI package distribution p
 
 | Skill | Description |
 |---|---|
+| [constraint-bug-description](skills/constraint-bug-description/) | Describe a builder constraint and production-index version gap for Jira |
 | [executive-summary](skills/executive-summary/) | Generate a 2-3 line executive summary of a packaging analysis |
 | [failure-analysis](skills/failure-analysis/) | Analyze a Python package build failure from log output |
 | [fondue-onboarding](skills/fondue-onboarding/) | Onboard a Python package into the fondue monorepo (`builder/` and/or `rhai-pipeline/`) |
+| [hardware-variant](skills/hardware-variant/) | Resolve free-text hardware requirements to one allowed accelerator variant |
 | [jira-context-summary](skills/jira-context-summary/) | Summarize Jira ticket context for downstream pipeline steps |
 | [license-check](skills/license-check/) | Check license compatibility for redistribution |
 | [packaging-investigation](skills/packaging-investigation/) | Deep investigation of a Python package for enterprise distribution |
@@ -26,9 +28,11 @@ agentic-ci Claude runner (container)
     v
 python-package-skills (this repo, mounted as plugin)
     |
+    +-- skills/constraint-bug-description/
     +-- skills/executive-summary/
     +-- skills/failure-analysis/
     +-- skills/fondue-onboarding/
+    +-- skills/hardware-variant/
     +-- skills/jira-context-summary/
     +-- skills/license-check/
     +-- skills/packaging-investigation/

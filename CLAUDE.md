@@ -16,10 +16,12 @@ Skills reference sibling files via `${CLAUDE_SKILL_DIR}`.
 
 The orchestrator (package-onboarding pipeline) prepares:
 
-- `/workspace/_context/<skill>-context.json` -- dynamic context for this invocation
-- `/workspace/` -- the target repository working directory
+- `_context/<skill>-context.json` under the current working directory -- dynamic context for this invocation
+- The current working directory -- the target repository working directory
 
-Skills read their context JSON first, then operate on the workspace.
+Skills read their context JSON first, then operate on the workspace. They must
+not assume a fixed mount path: OpenShell commonly uses `/sandbox/<workdir>`,
+while other runners may use a different location.
 
 ## Conventions
 

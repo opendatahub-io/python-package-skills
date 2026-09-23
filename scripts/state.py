@@ -9,7 +9,7 @@ All I/O through Python (no cat/echo that trigger auth prompts in sandbox).
 Subcommands:
     get <state-file> <key>          Read a value from the state file
     set <state-file> <key> <value>  Write a value to the state file
-    init <state-file>               Initialize a new state file
+    init <state-file> [context]     Initialize state with an optional context path
     dispatch-context <state-file>   Print dispatch instructions for context recovery
 
 State files use YAML for readability and are written to the workspace
@@ -52,7 +52,7 @@ def _save_state(path: Path, state: dict) -> None:
         )
 
 
-def cmd_init(state_file: Path) -> int:
+def cmd_init(state_file: Path, context_path: Path | None = None) -> int:
     """Initialize an empty state file."""
     scripts_dir = str(Path(__file__).resolve().parent)
     initial = {
@@ -61,6 +61,9 @@ def cmd_init(state_file: Path) -> int:
         "iteration": 0,
         "max_iterations": 3,
         "skill_name": "",
+        "context_path": str(context_path.expanduser().resolve())
+        if context_path
+        else "",
         "scripts_dir": scripts_dir,
         "last_action": "",
     }
@@ -140,17 +143,27 @@ def cmd_dispatch_context(state_file: Path) -> int:
     print(f"Last action: {last_action}")
     print()
 
-    context_path = f"/workspace/_context/{skill_name}-context.json"
+    context_value = state.get("context_path", "")
+    context_path = Path(context_value).expanduser().resolve() if context_value else None
+    context_instruction = (
+        f"Load {context_path} and extract all fields."
+        if context_path
+        else "No context path was stored; recover it from the active skill instructions."
+    )
 
     instructions = {
         "start": [
             "NEXT: Read the context JSON and begin the workflow.",
-            f"Load {context_path} and extract all fields.",
+            context_instruction,
             "Then read the target repository's AGENTS.md (if present).",
         ],
         "investigate": [
             "NEXT: Continue analysis/investigation of the package.",
-            f"Re-read {context_path} for the original requirements.",
+            (
+                f"Re-read {context_path} for the original requirements."
+                if context_path
+                else context_instruction
+            ),
             "Check git status to see what work has already been done.",
         ],
         "implement": [
@@ -205,9 +218,10 @@ def main() -> int:
     command = sys.argv[1]
     if command == "init":
         if len(sys.argv) < 3:
-            print("Usage: state.py init <state-file>", file=sys.stderr)
+            print("Usage: state.py init <state-file> [context-path]", file=sys.stderr)
             return 1
-        return cmd_init(Path(sys.argv[2]))
+        context_path = Path(sys.argv[3]) if len(sys.argv) >= 4 else None
+        return cmd_init(Path(sys.argv[2]), context_path)
     elif command == "get":
         if len(sys.argv) < 4:
             print("Usage: state.py get <state-file> <key>", file=sys.stderr)

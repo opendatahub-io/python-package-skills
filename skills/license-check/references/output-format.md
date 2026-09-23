@@ -34,8 +34,8 @@ Validate with:
 ```bash
 uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
   ${CLAUDE_SKILL_DIR}/schemas/license-verdict.json \
-  /workspace/.license-verdict.json \
-  --input /workspace/.license-verdict.json
+  .license-verdict.json \
+  --input .license-verdict.json
 ```
 
 ## Text report (Jira markup)

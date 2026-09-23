@@ -45,8 +45,8 @@ Validate with:
 ```bash
 uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
   ${CLAUDE_SKILL_DIR}/schemas/security-verdict.json \
-  /workspace/.security-verdict.json \
-  --input /workspace/.security-verdict.json
+  .security-verdict.json \
+  --input .security-verdict.json
 ```
 
 ## Markdown report

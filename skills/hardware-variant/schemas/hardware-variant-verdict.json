@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hardware Variant Verdict",
+  "description": "Machine-readable accelerator variant selected from request text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "variant", "reason"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["resolved", "unresolved"]
+    },
+    "variant": {
+      "oneOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"verdict": {"const": "resolved"}},
+        "required": ["verdict"]
+      },
+      "then": {"properties": {"variant": {"type": "string", "minLength": 1}}},
+      "else": {"properties": {"variant": {"type": "null"}}}
+    }
+  ]
+}
