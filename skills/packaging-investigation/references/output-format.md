@@ -50,7 +50,7 @@ uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
 
 `.investigation-output.md` must be Markdown body only (no surrounding fences)
 and follow the structure produced by
-`odh-ai-helpers:python-packaging-investigator` (do not rearrange sections).
+`odh-python-packaging:python-packaging-investigator` (do not rearrange sections).
 Typical sections include executive summary, source discovery, build system,
 compilation requirements, dependencies, environment, packaging issues, CI/CD,
 and recommended packaging strategy.

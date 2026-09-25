@@ -91,7 +91,7 @@ inputs:
       prompt: Block all git push operations during evaluation.
     - match: |
         Invocations of Skill tool for python-packaging-investigator
-        (odh-ai-helpers:python-packaging-investigator) or related packaging
+        (odh-python-packaging:python-packaging-investigator) or related packaging
         investigator helpers.
       prompt: |
         Do not call the external python-packaging-investigator agent. A
