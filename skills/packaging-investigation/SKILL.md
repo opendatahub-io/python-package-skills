@@ -71,7 +71,7 @@ Field details:
    succeed and do not skip the verdict artifact.
 
 2. **Run the investigation agent.** Invoke the
-   `odh-ai-helpers:python-packaging-investigator` agent with:
+   `odh-python-packaging:python-packaging-investigator` agent with:
    - `package_name`, `package_info`, `git_repo`, and `jira_context` from context
    - `skip_security_audit=true`
    - Instruct it to provide detailed, enterprise-ready guidance for building

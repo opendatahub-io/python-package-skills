@@ -96,7 +96,7 @@ inputs:
         directory with no license files and do not fetch remote content.
     - match: |
         Invocations of Skill tool for python-packaging-license-finder or
-        python-packaging-license-checker (odh-ai-helpers).
+        python-packaging-license-checker (odh-python-packaging).
       prompt: |
         Do not call external helper skills. Determine the SPDX identifier
         from LICENSE files or package metadata already in the workspace /
