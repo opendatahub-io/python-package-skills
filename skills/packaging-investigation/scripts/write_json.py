@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -219,19 +220,57 @@ def coerce_data(data: object, schema: dict) -> object:
 # -- CLI -----------------------------------------------------------------------
 
 
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def _sandbox_root() -> Path:
+    return Path("/sandbox")
+
+
+def _openshell_workspace_mount() -> Path:
+    return Path("/workspace")
+
+
+def _uses_openshell_workspace_mount() -> bool:
+    """OpenShell may write to /workspace as well as cwd. Codex may not."""
+    tool = os.environ.get("AGENT_TOOL", "").strip().lower()
+    if tool == "codex":
+        return False
+    if tool in {"claude", "opencode"}:
+        return True
+    cwd = Path.cwd().resolve()
+    sandbox = _sandbox_root()
+    return sandbox.is_dir() and (cwd == sandbox or _path_is_within(cwd, sandbox))
+
+
+def _approved_workspace_roots() -> list[Path]:
+    """cwd, plus the OpenShell /workspace mount when cwd is outside it."""
+    cwd = Path.cwd().resolve()
+    roots = [cwd]
+    if not _uses_openshell_workspace_mount():
+        return roots
+    mount = _openshell_workspace_mount()
+    if not mount.is_dir():
+        return roots
+    resolved = mount.resolve()
+    if resolved == cwd or _path_is_within(cwd, resolved):
+        return roots
+    roots.append(resolved)
+    return roots
+
+
 def _constrain_artifact_path(path: Path, *, label: str) -> Path | None:
-    """Resolve path; allow only cwd or /workspace (skill output root)."""
+    """Resolve path; allow only the active runner's workspace roots."""
     resolved = path.expanduser().resolve()
-    roots = [Path.cwd().resolve()]
-    workspace = Path("/workspace")
-    if workspace.exists():
-        roots.append(workspace.resolve())
+    roots = _approved_workspace_roots()
     for root in roots:
-        try:
-            resolved.relative_to(root)
+        if _path_is_within(resolved, root):
             return resolved
-        except ValueError:
-            continue
     print(
         f"{label} path escapes allowed roots {roots}: {path}",
         file=sys.stderr,
