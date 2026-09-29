@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Torch linkage evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "classification", "confidence", "signals", "reasons", "source_files"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "classification": {
+      "type": "string",
+      "enum": ["torch-linked", "torch-candidate", "not-torch-linked", "unknown"]
+    },
+    "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+    "signals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["known_package", "requires_torch", "torch_imports", "uses_torch_build_extension", "native_torch_libraries"],
+      "properties": {
+        "known_package": {"type": "boolean"},
+        "requires_torch": {"type": "boolean"},
+        "torch_imports": {"type": "array", "items": {"type": "string"}},
+        "uses_torch_build_extension": {"type": "boolean"},
+        "native_torch_libraries": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "reasons": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "source_files": {"type": "array", "items": {"type": "string"}}
+  }
+}

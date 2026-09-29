@@ -1,0 +1,25 @@
+{
+  "ticket": "AIPCC-32771",
+  "package_name": "sample-torch-extension",
+  "package_version": "1.0.0",
+  "package_info": "Name: sample-torch-extension\nVersion: 1.0.0\nRequires-Dist: torch\n",
+  "analysis": "The requested distribution builds a Torch C++ extension. In this fixture, release 1.0.0 supports Torch 2.13 on CPU and CUDA 13.0 only; CUDA 12.9 and Torch 2.14 have not been validated.",
+  "torch_evidence": {
+    "schema_version": 1,
+    "classification": "torch-linked",
+    "confidence": "high",
+    "signals": {
+      "known_package": false,
+      "requires_torch": true,
+      "torch_imports": ["torch"],
+      "uses_torch_build_extension": true,
+      "native_torch_libraries": ["libtorch_cpu.so"]
+    },
+    "reasons": ["setup.py uses torch.utils.cpp_extension.CppExtension"],
+    "source_files": ["setup.py"]
+  },
+  "jira_context": "Onboard sample-torch-extension for verified Torch 2.13 channels only.",
+  "summary": "Add sample-torch-extension to supported Torch 2.13 overlays.",
+  "requirements_comment": "# AIPCC-32771",
+  "mode": "pipeline-only"
+}

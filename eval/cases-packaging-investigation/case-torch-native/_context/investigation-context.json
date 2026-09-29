@@ -1,0 +1,20 @@
+{
+  "package_name": "sample-torch-extension",
+  "package_info": "Name: sample-torch-extension\nVersion: 1.0.0\nRequires-Dist: torch>=2.13\nSource setup.py uses torch.utils.cpp_extension.CppExtension to compile native/extension.cpp. The wheel contains sample_torch_extension/native.so linked against libtorch_cpu.so.\n",
+  "git_repo": "https://github.com/example/sample-torch-extension",
+  "jira_context": "Investigate native Torch linkage for onboarding.",
+  "torch_evidence": {
+    "schema_version": 1,
+    "classification": "torch-candidate",
+    "confidence": "medium",
+    "signals": {
+      "known_package": false,
+      "requires_torch": true,
+      "torch_imports": ["torch"],
+      "uses_torch_build_extension": false,
+      "native_torch_libraries": []
+    },
+    "reasons": ["Wheel metadata declares a runtime dependency on torch"],
+    "source_files": ["wheel:sample_torch_extension-1.0.0.whl"]
+  }
+}

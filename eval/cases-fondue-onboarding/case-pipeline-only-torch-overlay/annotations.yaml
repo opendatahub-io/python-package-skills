@@ -1,0 +1,18 @@
+notes: >-
+  A native Torch-linked package belongs in the Torch 2.13 overlays for CPU and
+  CUDA 13.0 only. The fixture covers the full job matrix, including channels
+  that have no 2.13 job and 2.14 jobs that do not yet support this package.
+requirements_mode: torch-overlay
+expected_mode: pipeline-only
+expected_commit_count: 1
+expected_ticket: AIPCC-32771
+expected_package: sample-torch-extension
+expected_specifier: sample-torch-extension==1.0.0
+expected_torch_placements: [cpu-ubi9:2.13, cuda13.0-ubi9:2.13]
+expected_job_matrix:
+  cpu-ubi9: ["2.11", "2.13", "2.14"]
+  cuda13.0-ubi9: ["2.11", "2.13", "2.14"]
+  cuda12.9-ubi9: ["2.11", "2.13"]
+  rocm7.14-ubi9: ["2.11", "2.12"]
+  spyre-ubi9: ["2.11"]
+expected_preserved_specifier: unrelated==1.0

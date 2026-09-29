@@ -1,0 +1,2 @@
+case: pipeline-only-torch-overlay
+package_name: sample-torch-extension

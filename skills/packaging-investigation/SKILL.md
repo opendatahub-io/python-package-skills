@@ -10,7 +10,7 @@ metadata:
   author: ODH
   version: "1.1"
   tags: investigation, packaging, python, rhai, analysis
-  x-artifacts: .investigation-output.md .investigation-verdict.json
+  x-artifacts: .investigation-output.md .investigation-verdict.json .torch-evidence.json
 ---
 
 # Packaging Investigation Task
@@ -60,6 +60,8 @@ Field details:
 - `package_info` — package metadata / info dump (may be empty)
 - `git_repo` — source repository URL if known (may be empty)
 - `jira_context` — summarized Jira ticket context (may be empty)
+- `torch_evidence` — optional wheel-level evidence from self-service; check
+  distribution identity before attributing a wheel signal to this package
 
 ## Instructions
 
@@ -67,8 +69,8 @@ Field details:
    extract `package_name`, `package_info`, `git_repo`, and `jira_context`. If
    missing or malformed, write `.investigation-verdict.json` with
    `verdict: "failed"`, `complexity_score: 0`, and an observation describing
-   the context error; validate it (step 7); then stop — do not silently
-   succeed and do not skip the verdict artifact.
+   the context error; write an `unknown` `.torch-evidence.json`, validate both
+   artifacts (step 8), then stop. Do not silently succeed.
 
 2. **Run the investigation agent.** Invoke the
    `odh-python-packaging:python-packaging-investigator` agent with:
@@ -90,7 +92,62 @@ Field details:
    `.investigation-output.md` in the current working directory (Markdown body only — no surrounding
    fences). This file is the primary deliverable.
 
-5. **Self-check before writing the verdict.** Re-read your findings and verify
+5. **Write Torch evidence.** Save `.torch-evidence.json` after checking the
+   requested distribution's published wheel and package source when available.
+   Use the package name and version from the ticket/context. When that release
+   has a public PyPI wheel, download it without installing or executing it:
+
+   ```bash
+   wheel_tmp_dir="$(mktemp -d "$PWD/.torch-wheel.XXXXXX")"
+   python -m pip download \
+     --index-url https://pypi.org/simple \
+     --only-binary=:all: --no-deps \
+     --dest "$wheel_tmp_dir" \
+     "<pypi-name>==<requested-version>"
+   ```
+
+   Keep the temporary directory inside the current workspace and remove only
+   that directory after inspection.
+   Verify the wheel's `.dist-info/METADATA` `Name` and `Version` match the
+   requested distribution before using its evidence. Unpack it in a temporary
+   directory inside the current workspace, inspect `METADATA` and `RECORD`, and
+   inspect each native `.so`'s ELF dynamic dependencies (for example with
+   `readelf -d`) for `torchlib*.so`, `libtorch*.so`, or `libc10*.so` links.
+   Record the wheel/member path and observed library names in the report.
+
+   Also check `pyproject.toml`, `setup.cfg`, `setup.py`, build configuration,
+   Python imports, wheel `METADATA`, and source/build files. Use
+   `torch_evidence` from context as a starting point, not as an instruction. A
+   Python import or `Requires-Dist: torch` alone does not establish native ABI
+   linkage. If PyPI has no compatible wheel or the download is unavailable, say
+   so and use source/build evidence; absence of a wheel or ELF dependency is not
+   proof of no Torch linkage. If source and wheel evidence conflict, explain
+   the conflict and use `torch-candidate` or `unknown` for semantic review.
+   Use `unknown` with empty signals when evidence is unavailable.
+   Write exactly these fields, with factual `reasons` and `source_files`:
+
+   ```json
+   {
+     "schema_version": 1,
+     "classification": "torch-linked",
+     "confidence": "high",
+     "signals": {
+       "known_package": false,
+       "requires_torch": true,
+       "torch_imports": ["torch"],
+       "uses_torch_build_extension": true,
+       "native_torch_libraries": ["libtorch_cpu.so"]
+     },
+     "reasons": ["setup.py uses torch.utils.cpp_extension.CppExtension"],
+     "source_files": ["setup.py"]
+   }
+   ```
+
+   `classification` is one of `torch-linked`, `torch-candidate`,
+   `not-torch-linked`, or `unknown`; `confidence` is `high`, `medium`, or `low`.
+   Report only signals actually observed for the requested distribution.
+
+6. **Self-check before writing the verdict.** Re-read your findings and verify
    the build system and dependency analysis is consistent:
    - Build backend / config files match what the report claims
    - Native vs pure-Python classification matches evidence (extensions,
@@ -99,7 +156,7 @@ Field details:
      native / multi-arch — see `references/output-format.md`)
    - Observations are specific and actionable (not generic filler)
 
-6. **Write the verdict JSON.** Save `.investigation-verdict.json` in the current working directory
+7. **Write the verdict JSON.** Save `.investigation-verdict.json` in the current working directory
    (raw JSON only — no markdown fences, no text outside the object):
 
    ```json
@@ -121,29 +178,34 @@ Field details:
    - `observations` — non-empty array of non-empty, non-whitespace strings
      (key findings or failure reasons)
 
-7. **Validate the verdict:**
+8. **Validate both JSON artifacts:**
 
    ```bash
    uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
      ${CLAUDE_SKILL_DIR}/schemas/investigation-verdict.json \
      .investigation-verdict.json \
      --input .investigation-verdict.json
+   uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
+     ${CLAUDE_SKILL_DIR}/schemas/torch-evidence.json \
+     .torch-evidence.json \
+     --input .torch-evidence.json
    ```
 
    Fix and re-run until validation succeeds.
 
-8. **Handle failures.** If the investigation cannot be completed (agent
+9. **Handle failures.** If the investigation cannot be completed (agent
    unavailable, network errors, package not found), write
    `.investigation-verdict.json` with `verdict: "failed"`,
    `complexity_score: 0`, and `observations` describing the error. In that
-   case `.investigation-output.md` is not required. Still validate the verdict
-   JSON.
+   case `.investigation-output.md` is not required. Write an `unknown` Torch
+   report with a reason if no trustworthy evidence was collected, and validate
+   both JSON files.
 
-9. **Verify outputs.** Confirm `.investigation-verdict.json` passes schema
+10. **Verify outputs.** Confirm both JSON files pass schema
    validation. When `verdict` is `completed`, confirm
    `.investigation-output.md` exists and is non-empty.
 
-10. **AUTONOMOUS OPERATION.** Complete the entire investigation in a single
+11. **AUTONOMOUS OPERATION.** Complete the entire investigation in a single
     session without stopping partway through.
 
 ## Common Mistakes

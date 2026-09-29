@@ -10,6 +10,7 @@ Downstream consumer: package-onboarding (`load_investigation_verdict` in
 |------|---------|
 | `.investigation-verdict.json` | Machine-parsed verdict (required) |
 | `.investigation-output.md` | Full packaging analysis (required when `verdict` is `completed`) |
+| `.torch-evidence.json` | Structured Torch linkage evidence, including `unknown` when unavailable (always required) |
 
 ## Verdict JSON
 
@@ -58,6 +59,21 @@ and recommended packaging strategy.
 When `verdict` is `failed`, the Markdown report is optional; the verdict JSON
 must still be valid with `complexity_score: 0` and observations explaining the
 failure.
+
+## Torch evidence report
+
+`.torch-evidence.json` follows `schemas/torch-evidence.json` and is consumed by
+package-onboarding before fondue onboarding. It distinguishes a Python Torch
+runtime dependency from native libTorch or Torch ABI linkage. Record the
+classification (`torch-linked`, `torch-candidate`, `not-torch-linked`, or
+`unknown`), confidence, observed signals, specific reasons, and source files.
+For a public PyPI wheel, verify the distribution name/version and inspect
+extracted native libraries' ELF dependencies for `torchlib*.so`,
+`libtorch*.so`, or `libc10*.so`; record observed names in
+`signals.native_torch_libraries` and the wheel/member in `source_files`. Do not
+infer a native link from an import or runtime requirement alone. Use `unknown`
+when evidence is missing or conflicting. Even a failed investigation must
+write a valid report with an explanation.
 
 ## Example (pure Python)
 
