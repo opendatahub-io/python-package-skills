@@ -1,0 +1,9 @@
+# Python bytecode (created by local pytest / imports)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local tool caches
+.pytest_cache/
+.ruff_cache/
+.venv/
