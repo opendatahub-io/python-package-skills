@@ -2,6 +2,8 @@
 
 AI skills for Python package onboarding into Red Hat's AI package distribution pipeline (RHAI). These skills are consumed by the [agentic-ci](https://github.com/opendatahub-io/agentic-ci) Claude runner image and orchestrated by the [package-onboarding](https://gitlab.com/redhat/rhel-ai/core/package-onboarding) pipeline.
 
+Portable guidance for coding agents lives in `AGENTS.md` and `.agents/` at the repo root. That material is runtime-neutral. Claude Code additionally reads `.claude/settings.json` for sandbox and plugin settings; other agent runtimes should follow `.agents/settings.json` and `.agents/runtime-guidance.md`.
+
 ## Skills
 
 | Skill | Description |

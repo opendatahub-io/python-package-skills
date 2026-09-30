@@ -18,6 +18,7 @@ Thank you for your interest in contributing to python-package-skills! This repos
 ## Repository Layout
 
 ```text
+.agents/                     Portable agent guidance
 skills/                      Skill directories (SKILL.md + references/)
   <skill-name>/
     SKILL.md                 Frontmatter + prompt body
@@ -25,11 +26,13 @@ skills/                      Skill directories (SKILL.md + references/)
 eval/                        Eval test case directories
   cases-<skill-name>/        Test cases per skill
 eval-<skill-name>.yaml       Eval configs at repo root
+.claude/                     Claude Code project settings
+.claude-plugin/              Plugin manifest
 hooks/                       Claude Code event hooks
 scripts/                     Shared scripts
 ```
 
-Read [AGENTS.md](AGENTS.md) for architecture details and conventions.
+Read [AGENTS.md](AGENTS.md) for architecture details and conventions. `CLAUDE.md` points at that file.
 
 ## Ways to Contribute
 
@@ -127,6 +130,7 @@ Example: `feat: add eval cases for failure-analysis skill`
 - Context is passed via JSON files in `_context/` under the current working directory, not template variable substitution
 - Every SKILL.md must include `metadata.x-artifacts` declaring files/dirs the skill creates
 - Skills reference sibling files via `${CLAUDE_SKILL_DIR}`
+- Pipeline skills stay in `skills/` so the plugin installer can discover them
 
 ## Code of Conduct
 

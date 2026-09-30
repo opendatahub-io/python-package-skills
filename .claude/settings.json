@@ -1,0 +1,57 @@
+{
+    "sandbox": {
+        "enabled": true,
+        "autoAllowBashIfSandboxed": true,
+        "excludedCommands": [],
+        "filesystem": {
+            "denyRead": [
+                "~/.ssh",
+                "~/.aws",
+                "~/.gnupg",
+                "~/.netrc",
+                "~/.kube",
+                "~/.config/gh",
+                "~/.config/gcloud",
+                "~/.docker/config.json",
+                ".env"
+            ],
+            "allowWrite": [
+                "."
+            ],
+            "denyWrite": [
+                ".env"
+            ]
+        },
+        "network": {
+            "allowedDomains": [
+                "github.com",
+                "api.github.com",
+                "gitlab.com",
+                "gitlab.cee.redhat.com",
+                "pypi.org",
+                "files.pythonhosted.org",
+                "redhat.atlassian.net",
+                "console.redhat.com",
+                "quay.io"
+            ],
+            "deniedDomains": []
+        },
+        "enableWeakerNestedSandbox": false
+    },
+    "extraKnownMarketplaces": {
+        "odh-ai-helpers": {
+            "source": {
+                "source": "github",
+                "repo": "opendatahub-io/ai-helpers"
+            }
+        }
+    },
+    "includeCoAuthoredBy": true,
+    "permissions": {
+        "deny": [
+            "Read(.env)",
+            "Read(**/.env)",
+            "Read(**/.env.*)"
+        ]
+    }
+}
