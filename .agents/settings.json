@@ -1,0 +1,53 @@
+{
+    "version": 1,
+    "description": "Portable agent policy for this repository. Agent runtimes must opt in to consume this file; it is not an automatically loaded runtime configuration.",
+    "sandbox": {
+        "required": true,
+        "allow_automatic_command_approval_when_sandboxed": true,
+        "allow_weaker_nested_sandbox": false
+    },
+    "filesystem": {
+        "write_scope": [
+            "repository",
+            "temporary-directories"
+        ],
+        "deny_read": [
+            "private-ssh-material",
+            "environment-files",
+            "credentials"
+        ],
+        "deny_write": [
+            "outside-checkout",
+            "environment-files",
+            "credentials"
+        ]
+    },
+    "commands": {
+        "require_approval": [
+            "container-engines",
+            "material-external-effects"
+        ]
+    },
+    "network": {
+        "allowed_domains": [
+            "github.com",
+            "api.github.com",
+            "gitlab.com",
+            "gitlab.cee.redhat.com",
+            "pypi.org",
+            "files.pythonhosted.org",
+            "redhat.atlassian.net",
+            "console.redhat.com",
+            "quay.io"
+        ]
+    },
+    "integrations": {
+        "odh-ai-helpers": {
+            "optional": true,
+            "source": "github:opendatahub-io/ai-helpers"
+        }
+    },
+    "attribution": {
+        "include_coauthored_by_when_required": true
+    }
+}

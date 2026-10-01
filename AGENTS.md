@@ -2,6 +2,19 @@
 
 AI skills for Python package onboarding into the RHAI pipeline. Each skill is a self-contained unit consumed by the agentic-ci Claude runner image.
 
+## Navigation
+
+Detailed context is organized in the `.agents/` tree. Start here for shared
+rules, then follow the path matching your task.
+
+Read [`.agents/README.md`](.agents/README.md) to find a task guide or portable
+skill. The guidance is tool-neutral and applies to any coding agent.
+
+- When **adding or changing a pipeline skill**, its eval, or a shared script,
+  see [`.agents/skills-authoring/README.md`](.agents/skills-authoring/README.md)
+  and the [`python-package-skills`](.agents/skills/python-package-skills/SKILL.md)
+  skill
+
 ## Skill format
 
 Each skill lives in `skills/<name>/` and contains:
@@ -12,6 +25,9 @@ Each skill lives in `skills/<name>/` and contains:
 - `references/` -- optional templates, schemas, and reference docs
 
 Skills reference sibling files via `${CLAUDE_SKILL_DIR}`.
+
+Pipeline skills stay in `skills/`. The plugin installer discovers `skills/`,
+`.claude/skills/`, and `.opencode/skills/`.
 
 ## Workspace contract
 
