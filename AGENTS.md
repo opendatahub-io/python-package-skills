@@ -1,6 +1,6 @@
 # python-package-skills
 
-AI skills for Python package onboarding into the RHAI pipeline. Each skill is a self-contained unit consumed by the agentic-ci Claude runner image.
+AI skills for Python package onboarding into the RHAI pipeline. Each skill is a self-contained unit consumed by the agentic-ci runner images.
 
 ## Navigation
 
@@ -24,7 +24,11 @@ Each skill lives in `skills/<name>/` and contains:
 - `schemas/` -- optional JSON Schema files for validating structured outputs
 - `references/` -- optional templates, schemas, and reference docs
 
-Skills reference sibling files via `${CLAUDE_SKILL_DIR}`.
+Skills must resolve sibling scripts and schemas in both Claude and Codex.
+Claude provides `${CLAUDE_SKILL_DIR}`. Codex installs skills under
+`${CODEX_HOME:-$HOME/.codex}`; the `SKILL.md` validation command locates its
+own directory there. Keep each `SKILL.md` self-contained because the agent
+works in the target repository, where this file is not an ancestor.
 
 Pipeline skills stay in `skills/`. The plugin installer discovers `skills/`,
 `.claude/skills/`, and `.opencode/skills/`.
@@ -50,7 +54,7 @@ Skills read their context JSON first, then operate on the workspace.
 - Context is passed via JSON files, not template variable substitution
 - Skill names follow `<domain>-<action>` pattern
 - Skills producing structured JSON outputs must include a JSON Schema in `schemas/` and validate output using `scripts/write_json.py` before completion
-- Skills must validate that file paths from context stay within `/workspace` -- reject path traversal (`../`), absolute paths outside `/workspace`, and symlink escapes
+- Skills must validate that file paths from context stay within the current working directory -- reject path traversal (`../`), absolute paths outside the work directory, and symlink escapes
 - Skills must validate context parameters fail-closed -- reject unexpected or missing values before making changes rather than falling through to a default path
 - Eval configs must include a `case-injected-command` test case verifying the skill does not execute or reflect poisoned input from scan data or context
 

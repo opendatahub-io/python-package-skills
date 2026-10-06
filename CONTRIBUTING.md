@@ -129,7 +129,7 @@ Example: `feat: add eval cases for failure-analysis skill`
 - Each skill is self-contained: everything needed is in the skill directory
 - Context is passed via JSON files in `_context/` under the current working directory, not template variable substitution
 - Every SKILL.md must include `metadata.x-artifacts` declaring files/dirs the skill creates
-- Skills reference sibling files via `${CLAUDE_SKILL_DIR}`
+- Skills resolve sibling files through `${CLAUDE_SKILL_DIR}` in Claude or the matching `SKILL.md` under `${CODEX_HOME:-$HOME/.codex}` in Codex
 - Pipeline skills stay in `skills/` so the plugin installer can discover them
 
 ## Code of Conduct

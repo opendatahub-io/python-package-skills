@@ -51,6 +51,8 @@ under `/sandbox/<workdir>`.
    stop — do not silently succeed.
 
 2. **Identify the license (SPDX).**
+   Check for `mock-repo/` before making any network request. When it exists,
+   assess its license file and do not query PyPI for this run.
    - **If `mock-repo/` exists** (eval/offline fixtures): use it as
      the source tree. Do not network-clone.
    - **Else with `source_url`:** Accept only `https://` URLs whose host is
@@ -108,8 +110,14 @@ under `/sandbox/<workdir>`.
 6. **Validate the verdict:**
 
    ```bash
-   uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
-     ${CLAUDE_SKILL_DIR}/schemas/license-verdict.json \
+   skill_dir="${CLAUDE_SKILL_DIR:-}"
+   if [ -z "$skill_dir" ]; then
+     skill_file=$(find "${CODEX_HOME:-$HOME/.codex}" -type f -path '*/skills/license-check/SKILL.md' -print -quit)
+     skill_dir="${skill_file%/SKILL.md}"
+   fi
+   test -f "$skill_dir/scripts/write_json.py" || exit 1
+   uv run --script "$skill_dir/scripts/write_json.py" \
+     "$skill_dir/schemas/license-verdict.json" \
      .license-verdict.json \
      --input .license-verdict.json
    ```
