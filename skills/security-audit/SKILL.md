@@ -124,8 +124,14 @@ Field details:
 7. **Validate the verdict:**
 
    ```bash
-   uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
-     ${CLAUDE_SKILL_DIR}/schemas/security-verdict.json \
+   skill_dir="${CLAUDE_SKILL_DIR:-}"
+   if [ -z "$skill_dir" ]; then
+     skill_file=$(find "${CODEX_HOME:-$HOME/.codex}" -type f -path '*/skills/security-audit/SKILL.md' -print -quit)
+     skill_dir="${skill_file%/SKILL.md}"
+   fi
+   test -f "$skill_dir/scripts/write_json.py" || exit 1
+   uv run --script "$skill_dir/scripts/write_json.py" \
+     "$skill_dir/schemas/security-verdict.json" \
      .security-verdict.json \
      --input .security-verdict.json
    ```
