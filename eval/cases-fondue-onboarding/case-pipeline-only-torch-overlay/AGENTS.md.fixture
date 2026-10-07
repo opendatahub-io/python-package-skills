@@ -1,0 +1,5 @@
+# Fondue Monorepo Guide
+
+Use the channel matrix in `ci-job-definitions.yml` for onboarding variants.
+Run `make linter` before committing. Keep Torch-linked requirements in channel
+overlays. Use a ticket in the commit subject and a body describing the change.

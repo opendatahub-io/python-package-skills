@@ -1,0 +1,8 @@
+notes: >-
+  Both the published wheel's libtorch dependency and source build evidence
+  identify a Torch C++ extension. The report must preserve the native wheel
+  library evidence, not classify from the runtime requirement alone.
+expected_verdict: completed
+expected_min_complexity: 6
+expected_torch_classification: torch-linked
+expected_native_torch_libraries: [libtorch_cpu.so]

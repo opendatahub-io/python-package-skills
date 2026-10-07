@@ -85,6 +85,9 @@ dataset:
     - expected_ticket: The Jira ticket key (must appear in requirements tracking comment).
     - expected_package: Package name (requirements basename must be <package>.txt).
     - expected_file_count: Exact number of added onboarding requirements files.
+    - requirements_mode: shared (default) or torch-overlay.
+    - expected_torch_placements: supported variant:channel pairs for overlay cases.
+    - expected_job_matrix: onboarding variant-to-channel matrix expected in ci-job-definitions.yml.
     - expected_specifier: >-
         Required prefix of the requirements line. Use pkg==ver for pinned
         cases, or "pkg  #" for unpinned (rejects an unexpected pin).
@@ -335,7 +338,7 @@ judges:
       return True, "Builder commit has Relates-to trailer"
 
   - name: requirements_files_created
-    if: "annotations.get('expected_commit_count', 1) > 0"
+    if: "annotations.get('expected_commit_count', 1) > 0 and annotations.get('requirements_mode', 'shared') == 'shared'"
     description: Verify exact onboarding requirements files were added under rhai-pipeline
     check: |
       import os
@@ -378,7 +381,7 @@ judges:
       return True, f"Added {len(req_files)} onboarding requirements files: {', '.join(sorted(req_files))}"
 
   - name: requirements_content_correct
-    if: "annotations.get('expected_commit_count', 1) > 0"
+    if: "annotations.get('expected_commit_count', 1) > 0 and annotations.get('requirements_mode', 'shared') == 'shared'"
     description: Verify each requirements file has exact specifier and tracking comment
     check: |
       import os
@@ -443,7 +446,7 @@ judges:
       return True, f"All {len(files)} files have correct specifier and tracking comment"
 
   - name: requirements_single_line
-    if: "annotations.get('expected_commit_count', 1) > 0"
+    if: "annotations.get('expected_commit_count', 1) > 0 and annotations.get('requirements_mode', 'shared') == 'shared'"
     description: Verify each requirements file contains exactly one physical line
     check: |
       import os
@@ -494,6 +497,103 @@ judges:
       if errors:
           return False, "; ".join(errors)
       return True, f"All {len(files)} requirements files have exactly 1 physical line"
+
+  - name: torch_overlay_placement
+    if: "annotations.get('requirements_mode') == 'torch-overlay'"
+    description: Verify Torch package overlays match the CI matrix and package support
+    check: |
+      import pathlib
+      import re
+      package = annotations['expected_package']
+      expected = annotations['expected_specifier']
+      ticket = annotations['expected_ticket']
+      root = pathlib.Path('rhai-pipeline/collections/onboarding')
+      errors = []
+
+      matrix_file = pathlib.Path('ci-job-definitions.yml')
+      if not matrix_file.is_file():
+          return False, f'Missing CI job matrix {matrix_file}'
+      matrix_text = matrix_file.read_text()
+      variants_match = re.search(
+          r'(?ms)^  variants:\n(.*?)(?=^  collections:)', matrix_text
+      )
+      if not variants_match:
+          return False, 'Could not find rhai_pipeline.variants in CI job matrix'
+      matrix = {}
+      variant_blocks = re.split(
+          r'(?m)^    ([A-Za-z0-9_.-]+):\s*$', variants_match.group(1)
+      )
+      for index in range(1, len(variant_blocks), 2):
+          variant = variant_blocks[index]
+          block = variant_blocks[index + 1]
+          version_match = re.search(
+              r'(?m)^      torch_versions:\s*\[([^\]]*)\]', block
+          )
+          if version_match:
+              matrix[variant] = set(re.findall(r'["\']([^"\']+)["\']', version_match.group(1)))
+
+      collection_match = re.search(
+          r'(?ms)^    onboarding:\n(.*?)(?=^    [A-Za-z0-9_-]+:|^  [A-Za-z0-9_-]+:|\Z)',
+          matrix_text,
+      )
+      onboarding_variants = set()
+      if collection_match:
+          variants_line = re.search(
+              r'(?m)^      variants:\s*\[([^\]]*)\]', collection_match.group(1)
+          )
+          if variants_line:
+              onboarding_variants = set(
+                  re.findall(r'[A-Za-z0-9_.-]+', variants_line.group(1))
+              )
+      matrix = {name: versions for name, versions in matrix.items() if name in onboarding_variants}
+
+      expected_matrix = {
+          str(name): {str(channel) for channel in channels}
+          for name, channels in annotations['expected_job_matrix'].items()
+      }
+      if matrix != expected_matrix:
+          errors.append(f'CI matrix differs from fixture expectation: {matrix}')
+
+      expected_pairs = set()
+      for placement in annotations['expected_torch_placements']:
+          variant, channel = placement.split(':', 1)
+          expected_pairs.add((variant, channel))
+          if channel not in matrix.get(variant, set()):
+              errors.append(f'Expected placement {placement} has no matching CI job')
+          overlay = root / variant / 'torch' / f'requirements-torch-{channel}.txt'
+          if not overlay.is_file():
+              errors.append(f'Missing {overlay}')
+              continue
+          lines = overlay.read_text().splitlines()
+          if not any(line.startswith(expected) and ticket in line for line in lines):
+              errors.append(f'{overlay} lacks {expected} and {ticket}')
+          preserved = annotations.get('expected_preserved_specifier')
+          if preserved and not any(line.startswith(preserved) for line in lines):
+              errors.append(f'{overlay} lost existing {preserved}')
+
+      def is_package_entry(line):
+          match = re.match(r'^\s*([A-Za-z0-9][A-Za-z0-9._-]*)', line)
+          if not match:
+              return False
+          normalize = lambda name: re.sub(r'[-_.]+', '-', name).lower()
+          return normalize(match.group(1)) == normalize(package)
+
+      for path in root.rglob('*.txt'):
+          relative = path.relative_to(root)
+          lines = path.read_text().splitlines()
+          if 'torch' not in relative.parts:
+              if any(is_package_entry(line) for line in lines):
+                  errors.append(f'Shared file {path} contains {package}')
+              continue
+          match = re.fullmatch(r'(?:requirements|constraints)-torch-(.+)\.txt', path.name)
+          if not match or len(relative.parts) != 3:
+              continue
+          actual_pair = (relative.parts[0], match.group(1))
+          if actual_pair in expected_pairs:
+              continue
+          if any(is_package_entry(line) for line in lines):
+              errors.append(f'{path} contains {package} outside supported placements')
+      return (not errors, '; '.join(errors) if errors else 'Torch overlays are channel-specific')
 
   - name: working_tree_clean
     description: Verify the working tree is clean after the skill finishes
@@ -704,6 +804,8 @@ thresholds:
   requirements_content_correct:
     min_mean: 1.0
   requirements_single_line:
+    min_mean: 1.0
+  torch_overlay_placement:
     min_mean: 1.0
   working_tree_clean:
     min_mean: 1.0

@@ -1,0 +1,2 @@
+case: torch-native
+package_name: sample-torch-extension

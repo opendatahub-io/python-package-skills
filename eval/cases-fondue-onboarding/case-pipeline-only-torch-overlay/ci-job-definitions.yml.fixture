@@ -1,0 +1,26 @@
+# Minimal fixture with the same matrix shape as the Fondue root configuration.
+rhai_pipeline:
+  torch_versions:
+    "2.11": {builder_collection: "torch-2.11.0"}
+    "2.12": {builder_collection: "torch-2.12.0"}
+    "2.13": {builder_collection: "torch-2.13.0"}
+    "2.14": {builder_collection: "torch-2.14.0"}
+  variants:
+    cpu-ubi9:
+      arches: [x86_64]
+      torch_versions: ["2.11", "2.13", "2.14"]
+    cuda12.9-ubi9:
+      arches: [x86_64]
+      torch_versions: ["2.11", "2.13"]
+    cuda13.0-ubi9:
+      arches: [x86_64]
+      torch_versions: ["2.11", "2.13", "2.14"]
+    rocm7.14-ubi9:
+      arches: [x86_64]
+      torch_versions: ["2.11", "2.12"]
+    spyre-ubi9:
+      arches: [x86_64]
+      torch_versions: ["2.11"]
+  collections:
+    onboarding:
+      variants: [cpu-ubi9, cuda12.9-ubi9, cuda13.0-ubi9, rocm7.14-ubi9, spyre-ubi9]

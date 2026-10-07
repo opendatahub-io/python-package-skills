@@ -40,10 +40,12 @@ Relates-to: <ticket>
 
 - Configuration under `builder/` (collections, plugins, overrides, settings as needed).
 - Optionally `.gitlab-triggers.yaml` when required for the package.
-- Package is added to the active torch collection (directory under
-  `builder/collections/torch-*` whose `cpu-ubi9/constraints.txt` contains a
-  `torch==` pin). Prefer the highest version that meets that rule. No new
-  collections are created.
+- For each relevant onboarding job, map its `TORCH_VERSION` through
+  `rhai_pipeline.torch_versions[version].builder_collection` in the root
+  `ci-job-definitions.yml` and configure the package in that exact builder
+  collection. This mapping supplies `BUILDER_TORCH_COLLECTION`; do not
+  substitute the numerically highest collection. No new collections are
+  created.
 
 ### Build strategy
 
@@ -92,10 +94,54 @@ Closes: <ticket>
 
 ### Requirements file format
 
-One file per variant at
+Ordinary packages use one file per supported variant at
 `rhai-pipeline/collections/onboarding/<variant>/requirements/<package_name>.txt`.
+Torch-linked packages include `vllm`, `torchvision`, `torchaudio`, `torchao`,
+`torchcodec`, `flash-attn`, `xformers`, `deep-ep`, `deep-gemm`, `nixl`,
+`pplx-kernels`, `kvcached`, `detectron2`, `amd-aiter`, `amd-quark`, vLLM plugins,
+and any package with native libTorch/Torch ABI evidence. For other packages,
+inspect the requested distribution's public PyPI wheel when available: download
+it without installing, verify its `.dist-info/METADATA` name and version, then
+inspect extracted native libraries' ELF dependency metadata for `torchlib*.so`,
+`libtorch*.so`, or `libc10*.so` links. A Python import or `Requires-Dist: torch`
+alone establishes a runtime relationship, not native ABI linkage. If no
+compatible wheel is available, use source/build evidence; wheel absence alone
+does not prove the package is not Torch-linked.
 
-Each file contains exactly one line:
+Read the root `ci-job-definitions.yml` to determine which Torch channels
+actually run for each variant. The current onboarding matrix is:
+
+| Variant | Torch channels with jobs |
+|---------|--------------------------|
+| `cpu-ubi9` | 2.11, 2.13, 2.14 |
+| `cuda13.0-ubi9` | 2.11, 2.13, 2.14 |
+| `cuda12.9-ubi9` | 2.11, 2.13 |
+| `rocm7.14-ubi9` | 2.11, 2.12 |
+| `spyre-ubi9` | 2.11 |
+
+The job-definition file is authoritative if this matrix changes. Add exactly
+one package entry to
+`rhai-pipeline/collections/onboarding/<variant>/torch/requirements-torch-X.Y.txt`
+only for a variant/channel pair that both has a job and is supported by the
+ticket and compatibility evidence. A job is necessary, but not sufficient, to
+claim package support. No job reads a 2.13 overlay under ROCm or Spyre. CPU and
+CUDA 13.0 jobs also run Torch 2.14, but leave that package out until its support
+is established. A channel without a package entry does not build it. Preserve
+unrelated entries. Channel-specific constraints, when needed, go in the
+matching `torch/constraints-torch-X.Y.txt`; never put Torch-linked packages in
+shared requirements or constraints.
+
+Use the package version specified by the onboarding ticket/context. If none is
+specified, leave the RHAI requirement unpinned unless the builder collection
+provides an exact pin. Do not copy historical 3.6-EA1/EA2 migration pins as the
+version for a new onboarding ticket. Use different versions across channels
+only when the ticket or compatibility evidence calls for that. If the matching
+builder Torch collection already pins the package with `==`, leave its RHAI
+requirement unpinned and do not duplicate the builder pin. Keep platform
+markers and the tracking comment on each entry.
+
+Each ordinary requirements file contains exactly one line. A Torch overlay may
+contain multiple package entries; add or update only the requested package:
 
 - **Pinned version**: `<package_name>==<package_version>  <requirements_comment>`
 - **Unpinned**: `<package_name>  <requirements_comment>`
@@ -132,10 +178,11 @@ git add -A -- rhai-pipeline/ :!_run
   `Relates-to: <ticket>` trailer.
 - The working tree must be clean after committing (`git status --porcelain` empty).
 - No files from `_run/` may appear in any commit.
-- A requirements file must exist for every variant under
-  `rhai-pipeline/collections/onboarding/`.
-- Each requirements file must contain exactly one line with the package specifier
-  and tracking comment.
+- An ordinary package must have a requirements file for every supported variant.
+  A Torch-linked package must appear only in supported channel overlays.
+- Each ordinary requirements file contains one line with the package specifier
+  and tracking comment. Each Torch overlay entry has its channel pin or remains
+  unpinned when the matching builder collection has an exact pin.
 - In combined mode, the builder package must appear only in the CPU variant unless
   it has accelerator dependencies.
 - `make linter` must exit 0 before every commit (and again after, amending if it

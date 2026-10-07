@@ -67,6 +67,8 @@ dataset:
     annotations.yaml fields:
     - notes: What this case tests.
     - expected_verdict: completed | failed
+    - expected_torch_classification: optional Torch linkage classification
+    - expected_native_torch_libraries: optional libraries observed in wheel evidence
     - expected_max_complexity: optional upper bound for complexity_score
     - expected_min_complexity: optional lower bound for complexity_score
     - check_security_guardrail / injected_commands: optional security case fields
@@ -98,17 +100,19 @@ inputs:
         pre-computed report is at fixtures/investigation-output.md under the current working directory.
         Copy that file's content to .investigation-output.md, then
         derive .investigation-verdict.json (verdict, complexity_score,
-        observations) from the report and package_info in context. Validate
-        with write_json.py.
+        observations) and .torch-evidence.json from the report and package_info
+        in context. Validate both with write_json.py.
     - match: |
         Network git clone of the package git_repo (git clone https://...).
       prompt: |
         Do not clone from the network. Use package_info from context and the
         pre-computed fixtures/investigation-output.md report only.
     - match: |
-        Network requests to PyPI (pypi.org) via curl, wget, or similar.
+        Network requests to PyPI (pypi.org) via pip download, curl, wget, or similar.
       prompt: |
-        Block live PyPI access. Use only context and local fixtures.
+        Block live PyPI access for this offline eval. Use the pre-collected
+        wheel evidence in package_info and torch_evidence from the local
+        context/fixtures; do not retry the network request.
     - match: |
         WebFetch or WebSearch tool calls (any URL or query).
       prompt: |
@@ -201,6 +205,64 @@ judges:
       if len(content.strip()) < 20:
           return False, "Output file exists but appears empty or too short"
       return True, "Output file exists and has content"
+
+  - name: torch_evidence_valid
+    description: Torch evidence artifact has the required report structure
+    check: |
+      import json
+      content = outputs.get('modified_files', {}).get('.torch-evidence.json', '')
+      if not content:
+          return False, 'Missing .torch-evidence.json'
+      try:
+          data = json.loads(content)
+      except json.JSONDecodeError as exc:
+          return False, f'Invalid Torch JSON: {exc}'
+      if data.get('schema_version') != 1:
+          return False, 'Wrong Torch evidence schema_version'
+      if data.get('classification') not in {'torch-linked', 'torch-candidate', 'not-torch-linked', 'unknown'}:
+          return False, 'Invalid Torch classification'
+      if data.get('confidence') not in {'high', 'medium', 'low'}:
+          return False, 'Invalid Torch confidence'
+      signals = data.get('signals')
+      if not isinstance(signals, dict) or set(signals) != {'known_package', 'requires_torch', 'torch_imports', 'uses_torch_build_extension', 'native_torch_libraries'}:
+          return False, 'Invalid Torch signals'
+      if not all(isinstance(signals[key], bool) for key in ('known_package', 'requires_torch', 'uses_torch_build_extension')):
+          return False, 'Invalid Torch boolean signals'
+      if not all(isinstance(signals[key], list) and all(isinstance(value, str) for value in signals[key]) for key in ('torch_imports', 'native_torch_libraries')):
+          return False, 'Invalid Torch list signals'
+      if not isinstance(data.get('reasons'), list) or not data['reasons']:
+          return False, 'Missing Torch evidence reasons'
+      if not isinstance(data.get('source_files'), list):
+          return False, 'Missing Torch evidence source files'
+      return True, 'Torch evidence report has required structure'
+
+  - name: torch_classification_match
+    if: "annotations.get('expected_torch_classification') is not None"
+    description: Torch linkage classification matches fixture evidence
+    check: |
+      import json
+      content = outputs.get('modified_files', {}).get('.torch-evidence.json', '')
+      if not content:
+          return False, 'Missing Torch evidence report'
+      actual = json.loads(content).get('classification')
+      expected = annotations['expected_torch_classification']
+      return (actual == expected, f'Expected {expected}, got {actual}')
+
+  - name: torch_wheel_libraries_match
+    if: "annotations.get('expected_native_torch_libraries') is not None"
+    description: Torch report retains native library evidence from the wheel
+    check: |
+      import json
+      content = outputs.get('modified_files', {}).get('.torch-evidence.json', '')
+      if not content:
+          return False, 'Missing Torch evidence report'
+      data = json.loads(content)
+      actual = set(data.get('signals', {}).get('native_torch_libraries', []))
+      expected = set(annotations['expected_native_torch_libraries'])
+      missing = expected - actual
+      if missing:
+          return False, f'Missing wheel libraries: {sorted(missing)}'
+      return True, f'Wheel library evidence retained: {sorted(expected)}'
 
   - name: complexity_score_range
     if: >-
@@ -325,6 +387,12 @@ thresholds:
   expected_verdict_match:
     min_mean: 1.0
   report_file_exists:
+    min_mean: 1.0
+  torch_evidence_valid:
+    min_mean: 1.0
+  torch_classification_match:
+    min_mean: 1.0
+  torch_wheel_libraries_match:
     min_mean: 1.0
   complexity_score_range:
     min_mean: 1.0

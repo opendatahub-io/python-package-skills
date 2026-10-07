@@ -1,0 +1,32 @@
+# sample-torch-extension Build Analysis
+
+## Executive summary
+
+sample-torch-extension is a native Torch extension. It requires a C++ compiler
+and the libTorch ABI matching the selected Torch channel.
+
+## Source Discovery
+
+- Repository URL: https://github.com/example/sample-torch-extension
+- Source files: setup.py and native/extension.cpp
+
+## Build System Analysis
+
+- Build backend: setuptools
+- setup.py uses torch.utils.cpp_extension.CppExtension for native/extension.cpp
+- Repository layout: build files at repository root
+
+## Compilation Requirements
+
+- Native compilation: required, C++
+- Complexity score: 8/10
+- System libraries: libtorch_cpu.so and C++ runtime
+
+## Dependencies Analysis
+
+- Build dependencies: torch, setuptools, wheel
+- Runtime dependencies: torch>=2.13
+
+## Packaging Strategy
+
+- Build against the selected Torch channel and install through that channel's overlay.
