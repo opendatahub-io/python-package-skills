@@ -1,6 +1,11 @@
-# Eval stub: simulates fondue make linter / make regen.
-# Touches .gitlab-triggers.yaml only when builder/ is present (combined path).
-.PHONY: linter
-linter:
+# Sandbox-compatible Fondue validation fixture.
+.PHONY: regen linter-sandbox linter-mr linter
+regen:
 	@if [ -d builder ]; then touch .gitlab-triggers.yaml; fi
-	@echo "Linter passed"
+linter-sandbox: regen
+	@echo "Sandbox checks passed"
+linter-mr: linter-sandbox
+	@git diff --cached --quiet || { echo "Commit staged changes first"; exit 1; }
+	@echo "MR checks passed"
+linter:
+	@echo "Full linter requires capabilities unavailable in the agent sandbox"; exit 1
