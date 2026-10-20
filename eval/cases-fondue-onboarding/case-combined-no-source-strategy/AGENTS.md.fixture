@@ -15,4 +15,4 @@
 
 ## Linting
 
-Run `make linter` before committing. Fix all errors.
+Run `make linter-sandbox` before committing and `make linter-mr` afterward. Fix all errors.

@@ -64,13 +64,9 @@ Relates-to: <ticket>
 
 ### Staging
 
-`make linter` auto-generates `.gitlab-triggers.yaml` (via `make regen` / `regen-ci.py`) whenever `builder/` collections change. Do not create that file by hand. After lint exits 0:
+`make regen` generates `.gitlab-triggers.yaml` and `.gitlab-test-jobs.yaml` (via `regen-ci.py`) when `builder/` collections change. Do not create them by hand. Stage changed builder and generated files by name. Check `git ls-files --others --exclude-standard -- builder/ rhai-pipeline/` and stage intended new files by name so plugins and settings are not omitted. Then run `make linter-sandbox` before committing and `make linter-mr` afterward.
 
-```bash
-git add -A -- builder/ .gitlab-triggers.yaml :!_run
-```
-
-Always include `.gitlab-triggers.yaml` in the builder commit. Do not stage `rhai-pipeline/` in the builder commit.
+Include changed generated files in the builder commit. Do not stage `rhai-pipeline/` or `_run/` in the builder commit.
 
 ## RHAI-pipeline commit (always)
 
@@ -148,16 +144,15 @@ contain multiple package entries; add or update only the requested package:
 
 ### Staging
 
-```bash
-git add -A -- rhai-pipeline/ :!_run
-```
+Stage changed `rhai-pipeline/` files by name. Check for untracked files under
+`builder/` and `rhai-pipeline/` before committing. Never stage `_run/`.
 
 ## Constraints
 
 - Only one package per onboarding run. Transitive dependencies are listed in a
   commit body but not configured.
 - The `_run/` directory must never be staged.
-- All changes must pass `make linter` before the final commit(s).
+- Run `make linter-sandbox` before each commit and `make linter-mr` after it.
 - All AGENTS.md rules (architecture-specific exclusions, platform markers,
   commit format) must be followed.
 - A missing PyPI sdist or a universal metapackage wheel is not sufficient
@@ -185,9 +180,9 @@ git add -A -- rhai-pipeline/ :!_run
   unpinned when the matching builder collection has an exact pin.
 - In combined mode, the builder package must appear only in the CPU variant unless
   it has accelerator dependencies.
-- `make linter` must exit 0 before every commit (and again after, amending if it
-  rewrites files). On a successful combined path it regenerates
-  `.gitlab-triggers.yaml`, which must be included in the builder commit.
+- `make linter-sandbox` must pass before every commit, and `make linter-mr`
+  must pass afterward. Amend if either check rewrites files. On a successful
+  combined path, include changed generated files in the builder commit.
 
 ## Downstream consumers
 

@@ -37,11 +37,11 @@ See `references/output-format.md` for the full output contract.
 
 1. **Read context.** Load `_context/fondue-context.json` from the current working directory. Do not assume the repository is mounted at `/workspace`; OpenShell uses `/sandbox/<workdir>`. Proceed autonomously.
 
-2. **Mandatory linting gate.** Run `make linter` after every set of changes and before every commit. Do not commit until `make linter` exits 0 and `git status` is clean.
-   - `make linter` runs `make regen` internally (via `regen-ci.py`) and auto-generates files including `.gitlab-triggers.yaml`. Do not create `.gitlab-triggers.yaml` by hand.
-   - Any change under `builder/` collections regenerates `.gitlab-triggers.yaml`. Stage that file with the builder commit -- it is always expected when builder collections change.
-   - If lint modifies files, stage them and run `make linter` again until exit 0 and a clean tree.
-   - Workflow: change files -> `make linter` -> fix/stage -> `make linter` -> repeat until clean -> commit.
+2. **Mandatory MR checks.** Run `make regen`, stage changes, then run `make linter-sandbox` before each commit. After committing, run `make linter-mr`. Never run `make linter` in OpenShell: its `unshare` probe and `lint-central` need unavailable capabilities.
+   - `make regen` generates files including `.gitlab-triggers.yaml`; never create them by hand. Include changed `.gitlab-triggers.yaml` and `.gitlab-test-jobs.yaml` in the builder commit.
+   - Check `git ls-files --others --exclude-standard -- builder/ rhai-pipeline/` before committing. Stage intended new files by name; `make linter-sandbox` misses non-generated untracked files.
+   - `make linter-sandbox` reruns regen. Review and stage rewritten files by name, then rerun until it passes.
+   - `make linter-mr` requires committed changes. If it rewrites files, stage by name, amend, and rerun until it passes.
 
 **Canonical name verification.** The `package_name` from context may not match the canonical Python package name. Before creating any files, verify the canonical name using the package investigation data from context. Precedence: PyPI name (if published, this is authoritative) > `pyproject.toml` `[project] name` > `setup.cfg` / `setup.py` name > internal references > context `package_name`. If the canonical name differs, use the canonical name for all filenames, settings files, requirements entries, and collection entries throughout this onboarding. The canonical name is what the built wheel will produce and what fromager resolves.
 
@@ -86,9 +86,8 @@ See `references/output-format.md` for the full output contract.
      rule above.
    - If you set `resolver_dist.include_sdists: false` and `include_wheels: false` in the package settings, you must also create a `get_resolver_provider` plugin to provide alternative version resolution. Without it, fromager cannot find versions. See existing plugins (e.g. `ctranslate2.py`) in `builder/package_plugins/` as reference.
    - Configure the package under `builder/` only (do not hand-edit `.gitlab-triggers.yaml`).
-   - Run `make linter` (rule 2). This auto-generates `.gitlab-triggers.yaml`.
-   - Once lint passes and the tree is clean, stage with `git add -A -- builder/ .gitlab-triggers.yaml :!_run` and commit. Always include `.gitlab-triggers.yaml`. Never stage `rhai-pipeline/` or `_run/`.
-   - After committing, run `make linter` again; amend with `git commit -a --amend --no-edit` if it modifies files. Repeat until clean.
+   - Run `make regen`; stage builder and changed generated files by name. Run `make linter-sandbox` before committing. Exclude `rhai-pipeline/` and `_run/`.
+   - After committing, run `make linter-mr`; amend changed files until checks pass and the tree is clean.
 
 7. **Builder commit message.** Follow AGENTS.md. Trailer must be `Relates-to: <ticket>` (not `Closes`).
 
@@ -115,15 +114,15 @@ See `references/output-format.md` for the full output contract.
    - Explore `rhai-pipeline/collections/onboarding/`, its Torch matrix, and
      comparable requirement and overlay files.
    - Create the shared requirement files or Torch overlays from step 8.
-   - Run `make linter` (rule 2) until it passes.
-   - Stage with `git add -A -- rhai-pipeline/ :!_run`, commit, then re-run lint and amend until clean.
+   - Run `make regen`; stage rhai-pipeline changes by name, then run `make linter-sandbox` until it passes. Never stage `_run/`.
+   - Commit, then run `make linter-mr`; amend changed files until checks pass and the tree is clean.
 
 10. **RHAI-pipeline commit message.**
     - Subject: `<ticket>: add package <package_name> into 'onboarding' collection`
     - Body: `summary` from context
     - Trailer: `Closes: <ticket>`
 
-11. **Self-check.** For successful onboarding, verify mode-correct commit count, correct trailers, all package-supported variants/channels covered with correct shared or Torch-overlay placement, no Torch-linked shared requirement, CPU-default builder placement, `.gitlab-triggers.yaml` in the builder commit (combined), no `_run/`, and clean `git status`. For a combined-mode fail-closed source-strategy outcome, verify no commits or partial changes remain, including no generated `pre_built: true` setting.
+11. **Self-check.** For successful onboarding, verify mode-correct commit count, correct trailers, all package-supported variants/channels covered with correct shared or Torch-overlay placement, no Torch-linked shared requirement, CPU-default builder placement, `.gitlab-triggers.yaml` in the builder commit (combined), no `_run/`, no untracked files under `builder/` or `rhai-pipeline/` (`git ls-files --others --exclude-standard -- builder/ rhai-pipeline/`), and clean `git status`. For a combined-mode fail-closed source-strategy outcome, verify no commits or partial changes remain, including no generated `pre_built: true` setting.
 
 12. **Transitive deps.** If undeclared transitive deps exist in-repo analysis, list them under `Transitive dependencies:` in the builder commit body (combined) or rhai-pipeline commit body (pipeline-only). Do not configure them.
 
