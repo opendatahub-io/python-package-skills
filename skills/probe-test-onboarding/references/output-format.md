@@ -123,3 +123,7 @@ Note: All imports are inside test functions, not at module level. Each test is s
 - **CI test runner**: executes the committed probe tests against the built
   package wheel to verify that the package installs correctly and core
   functionality works as expected.
+
+## Final response and transcript
+
+Finish with a concise summary of the changes, validation results and commit SHA(s), or explain why no valid commit could be produced. The host pipeline captures this response and the emitted tool events, then publishes the transcript to Jira. The sandbox does not need Jira credentials or a separate chat-log upload.

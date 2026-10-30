@@ -77,7 +77,7 @@ Read `_context/probe-test-context.json` first. It contains:
 
 9. **SINGLE PACKAGE ONLY.** Only create probe tests for the package from the context. Do NOT add tests for any transitive dependencies or other packages, even if the analysis mentions them.
 
-10. **FINAL STEPS.** After successful commit, use the jira-upload-chat-log skill to upload the chat log to the Jira ticket from the context.
+10. **Final summary.** Report the changes made, validation results, and commit SHA(s). If onboarding could not complete, explain the blocker and any remaining work. The host pipeline captures the agent output and attaches the transcript to Jira after the sandbox exits. Leave Jira publication to the host; do not invoke a chat-log upload skill or write a separate chat log in `/tmp`.
 
 IMPORTANT: You must complete ALL steps in a single session -- do not stop partway through to describe remaining work. Execute every step from analysis through commit without interruption. A missing commit is a failure.
 

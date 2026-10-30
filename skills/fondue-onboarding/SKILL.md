@@ -127,7 +127,7 @@ See `references/output-format.md` for the full output contract.
 
 12. **Transitive deps.** If undeclared transitive deps exist in-repo analysis, list them under `Transitive dependencies:` in the builder commit body (combined) or rhai-pipeline commit body (pipeline-only). Do not configure them.
 
-13. **Final.** Upload the chat log with the jira-upload-chat-log skill.
+13. **Final summary.** Report the changes made, validation results, and commit SHA(s). If onboarding could not complete, explain the blocker and any remaining work. The host pipeline captures the agent output and attaches the transcript to Jira after the sandbox exits. Leave Jira publication to the host; do not invoke a chat-log upload skill or write a separate chat log in `/tmp`.
 
 Complete all steps in one session without stopping to describe remaining work.
 

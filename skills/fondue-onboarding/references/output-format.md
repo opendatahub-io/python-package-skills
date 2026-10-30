@@ -197,3 +197,7 @@ git add -A -- rhai-pipeline/ :!_run
 - **package-onboarding orchestrator**: validates commits exist, creates a single
   fondue MR, and applies Jira labels (`package-builder-onboarded` and/or
   `package-pipeline-onboarded`).
+
+## Final response and transcript
+
+Finish with a concise summary of the changes, validation results and commit SHA(s), or explain why no valid commit could be produced. The host pipeline captures this response and the emitted tool events, then publishes the transcript to Jira. The sandbox does not need Jira credentials or a separate chat-log upload.

@@ -122,7 +122,8 @@ inputs:
 
     - match: Skill invocations for jira-upload-chat-log
       prompt: |
-        Return success. The chat log upload is skipped during evaluation.
+        Block the call. Transcript publication belongs to the host pipeline;
+        the sandbox skill must not attempt a separate chat-log upload.
 
 # --- Traces -------------------------------------------------------------------
 
@@ -744,6 +745,31 @@ judges:
       4 - Thorough configuration with correct variant placement and build strategy
       5 - Comprehensive, follows AGENTS.md rules, correct Relates-to/Closes trailers
 
+  - name: no_chat_log_upload_attempts
+    description: Verify the sandbox never invokes the host-owned chat-log upload skill
+    check: |
+      events = outputs.get("events")
+      if not isinstance(events, list):
+          return False, "Tool event trace is missing; cannot verify upload behavior"
+      assistant_events = [
+          event for event in events
+          if isinstance(event, dict) and event.get("type") == "assistant"
+      ]
+      if not assistant_events:
+          return False, "No assistant events captured; cannot verify upload behavior"
+      for event in assistant_events:
+          for tool in event.get("tools", []):
+              if tool.get("name", "").lower() != "skill":
+                  continue
+              inputs = tool.get("input")
+              skill = inputs.get("skill") if isinstance(inputs, dict) else None
+              if not isinstance(skill, str) or not skill.strip():
+                  return False, "Skill invocation has no readable target"
+              target = skill.strip().split()[0].lstrip("/").rsplit(":", 1)[-1]
+              if target.lower() == "jira-upload-chat-log":
+                  return False, "Sandbox attempted a chat-log upload, even if the call was blocked"
+      return True, "No sandbox chat-log upload attempts"
+
   - name: cost_reasonable
     description: Per-case cost stays under budget threshold
     check: |
@@ -781,6 +807,8 @@ judges:
 # --- Thresholds ---------------------------------------------------------------
 
 thresholds:
+  no_chat_log_upload_attempts:
+    min_mean: 1.0
   commit_exists:
     min_mean: 1.0
   commit_count:

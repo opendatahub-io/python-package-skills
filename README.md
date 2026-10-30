@@ -42,7 +42,7 @@ python-package-skills (this repo, mounted as plugin)
     +-- skills/security-audit/
 ```
 
-The orchestrator prepares a workspace with context files and the target repository, then invokes a skill. The skill reads its context, operates on the repo, and produces git commits or output files.
+The orchestrator prepares a workspace with context files and the target repository, then invokes a skill. The skill reads its context, operates on the repo, and produces git commits or output files. The host package-onboarding pipeline captures the emitted agent output and publishes sanitized transcripts to Jira. Onboarding skills finish with a summary of changes, validation results and commit SHA(s); they leave Jira publication to the host.
 
 ## Development
 
