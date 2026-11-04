@@ -4,6 +4,7 @@ notes: >-
 expected_mode: combined
 expected_commit_count: 2
 expected_placement: "universal/cpu-ubi9 (pure Python, built once on x86_64)"
+expected_builder_placements: ["universal/cpu-ubi9"]
 expected_build_strategy: "source"
 expected_file_count: 3
 expected_specifier: "text-utils==1.2.0"

@@ -92,6 +92,8 @@ dataset:
         Required prefix of the requirements line. Use pkg==ver for pinned
         cases, or "pkg  #" for unpinned (rejects an unexpected pin).
     - expected_placement: Builder variant placement (combined cases).
+    - expected_builder_placements: Exact collection/variant pairs for the
+      target package's builder requirements (successful combined cases).
     - expected_build_strategy: source, pre-built, or fail-closed (combined cases).
     - forbid_prebuilt: Reject `pre_built: true` in the generated builder diff.
     - expected_plugin: Required package plugin path for source-only cases.
@@ -315,6 +317,43 @@ judges:
       if subject != expected:
           return False, f"Subject '{subject}' != expected '{expected}'"
       return True, f"Subject exactly matches: {subject}"
+
+  - name: builder_collection_placement
+    if: "annotations.get('expected_mode') == 'combined' and annotations.get('expected_commit_count', 1) > 0"
+    description: Verify exact builder lane and variant placement, with no extra lanes
+    check: |
+      import pathlib
+      import re
+
+      expected = set(annotations.get("expected_builder_placements", []))
+      package = annotations.get("expected_package", "")
+      if not expected or not package:
+          return False, "Missing expected builder placements or package"
+
+      def normalize(name):
+          return re.sub(r"[-_.]+", "-", name).lower()
+
+      root = pathlib.Path("builder/collections")
+      actual = set()
+      for path in root.rglob("*.txt"):
+          relative = path.relative_to(root)
+          parts = relative.parts
+          if len(parts) < 3:
+              continue
+          if not (
+              (len(parts) == 3 and parts[2] == "requirements.txt")
+              or (len(parts) >= 4 and parts[2] == "requirements")
+          ):
+              continue
+          for line in path.read_text().splitlines():
+              match = re.match(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)(?=[\s\[<>=!~;@]|$)", line)
+              if match and normalize(match.group(1)) == normalize(package):
+                  actual.add("/".join(parts[:2]))
+      if actual != expected:
+          missing = sorted(expected - actual)
+          extra = sorted(actual - expected)
+          return False, f"Builder placement mismatch: missing={missing}, extra={extra}"
+      return True, f"Exact builder placements: {', '.join(sorted(actual))}"
 
   - name: builder_commit_trailer
     if: "annotations.get('expected_mode') == 'combined' and annotations.get('expected_commit_count', 1) > 0"

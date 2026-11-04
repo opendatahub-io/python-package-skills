@@ -8,16 +8,9 @@ The invocable skill is
 
 ## Setup
 
-Python 3.10+. CI runs 3.13 (`python-version` in `.github/workflows/lint.yml`).
-
-```bash
-uvx skillsaw
-pip install ruff pytest jsonschema
-```
-
-`python -m pytest tests/ -v` imports the JSON writers directly. `pytest` and
-`jsonschema` have to be installed in that environment. The `uv` script headers
-inside those writers do not apply to that import.
+Python 3.11+ and `uv` (which provides `uvx`). CI runs Python 3.13.
+The validation commands below use isolated tool environments; no local
+`pip install` step is needed.
 
 ## Execution
 
@@ -51,6 +44,13 @@ Eval cases need `input.yaml`, `annotations.yaml`, and
 use a `.fixture` suffix. Start from `eval/references/eval-template.yaml` and
 `eval/references/cross-cutting-judges.md`.
 
+Fondue combined-mode cases include the collection-integration guide, the root
+job matrix, and existing builder lane directories. Successful cases declare
+`expected_builder_placements` as exact `collection/variant` pairs; the eval
+checks every target-package requirement against those pairs. Run the fixture
+and judge checks with
+`uvx --with pyyaml pytest tests/test_fondue_builder_placement.py -q`.
+
 `tests/test_write_json_workspace.py` loads the `packaging-investigation` and
 `security-audit` writers. Extend that list when another writer's containment
 changes.
@@ -58,12 +58,11 @@ changes.
 ## Validation
 
 ```bash
-make lint
-python -m pytest tests/ -v
+uvx skillsaw
+uvx ruff check .
+uvx ruff format --check --diff .
+uvx --with jsonschema --with pyyaml pytest tests/ -q
 ```
-
-`make lint` is skillsaw, `ruff check`, and `ruff format --check`. It does not
-run the eval harness.
 
 ## Troubleshooting
 

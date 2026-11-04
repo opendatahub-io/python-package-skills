@@ -5,6 +5,7 @@ notes: >-
 expected_mode: combined
 expected_commit_count: 2
 expected_placement: "torchless/cpu-ubi9 and torchless/<cuda variant> (compiled, no torch)"
+expected_builder_placements: ["torchless/cpu-ubi9", "torchless/cuda12.9-ubi9"]
 expected_build_strategy: "source"
 expected_file_count: 3
 expected_specifier: "gpu-compute==0.3.1"

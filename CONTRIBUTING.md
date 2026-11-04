@@ -45,8 +45,8 @@ Read [AGENTS.md](AGENTS.md) for architecture details and conventions. `CLAUDE.md
 
 ### Prerequisites
 
-- **Python 3.10+** with [ruff](https://docs.astral.sh/ruff/) (`pip install ruff`)
-- **[skillsaw](https://skillsaw.org/)** (`pip install skillsaw` or use via `uvx skillsaw`)
+- **Python 3.11+**
+- **uv**, which provides `uvx` for isolated tool runs
 - **Git**
 
 ### Validate Your Changes
@@ -54,13 +54,20 @@ Read [AGENTS.md](AGENTS.md) for architecture details and conventions. `CLAUDE.md
 Before submitting, always run:
 
 ```bash
-make lint
+uvx skillsaw
+uvx ruff check .
+uvx ruff format --check --diff .
+uvx --with jsonschema --with pyyaml pytest tests/ -q
 ```
 
-The `lint` target runs:
+The lint commands run:
 - **skillsaw** validates skill frontmatter, structure, and content quality
 - **ruff check** checks Python code for errors
 - **ruff format** verifies Python code formatting
+
+The pytest suite checks validator commands and workspace containment. It imports
+the JSON writers directly; `--with jsonschema` provides their dependency,
+and `--with pyyaml` supports the fixture checks. CI runs this suite after linting.
 
 ### Skill Structure
 
@@ -86,10 +93,7 @@ Each test case directory contains:
 
 ## Submitting Your Contribution
 
-1. **Run validation** before committing:
-   ```bash
-   make lint
-   ```
+1. **Run the validation commands above** before committing.
 2. **Commit your changes** with a clear, descriptive commit message.
 3. **Push to your fork** and open a Pull Request against `main`.
 4. **Fill out the PR description** with a summary and test plan.

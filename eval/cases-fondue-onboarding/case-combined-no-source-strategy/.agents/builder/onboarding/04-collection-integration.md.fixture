@@ -1,0 +1,24 @@
+# Collection Integration
+
+Choose exactly one build-needs lane, stopping at the first matching rule:
+
+0. Without a settings file, plugin, or patch, keep the package out of builder
+   collections. Combined onboarding provides a builder override.
+1. If bootstrapping reaches torch (including build/install dependencies,
+   libtorch/libc10 linkage, or torch-pinned companions such as triton), use a
+   `torch-*` collection. Map each relevant onboarding job's `TORCH_VERSION`
+   through `rhai_pipeline.torch_versions[version].builder_collection` in the
+   root `ci-job-definitions.yml`. Verify its CPU constraints pin `torch==`;
+   never select a collection by sorting for the highest version.
+2. If every wheel we build is `py3-none-any`, use `universal/cpu-ubi9`, built
+   once on x86_64. Judge the source build, not only the wheel published on PyPI.
+3. If the build differs per accelerator, or pulls in a package whose build
+   does, use `torchless/<accelerator variant>` and also `torchless/cpu-ubi9`
+   when there is a CPU build.
+4. Otherwise use `torchless/cpu-ubi9`. Loading accelerator libraries only at
+   runtime does not make an otherwise identical build accelerator-specific.
+
+Never put a package that pulls torch or triton in universal or torchless.
+Use the existing collections and variants. Add requirements to
+`requirements.txt` or a file under `requirements/`, preserving markers and
+tracking comments. Build from source; never generate `pre_built: true`.

@@ -8,13 +8,11 @@
 
 ## Package Placement Rules
 
-- Find active torch collections under `builder/collections/torch-*` where
-  `cpu-ubi9/constraints.txt` contains a `torch==` pin
-- Default: add to CPU variant (`cpu-ubi9/requirements.txt`) for the highest
-  active torch collection
-- Only add to CUDA/ROCm if the package depends on an accelerator stack
-- Prefer source-based building
+Follow [Collection Integration](onboarding/04-collection-integration.md).
+Select universal, torchless, or the mapped Torch collection from build needs;
+never default every package to a Torch collection. Prefer source-based building.
 
 ## Linting
 
-Run `make linter` before committing. Fix all errors.
+Run `make regen` and `make linter-sandbox` before committing, then
+`make linter-mr` after committing. Fix all errors.
