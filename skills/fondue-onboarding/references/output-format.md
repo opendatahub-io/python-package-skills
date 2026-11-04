@@ -40,12 +40,16 @@ Relates-to: <ticket>
 
 - Configuration under `builder/` (collections, plugins, overrides, settings as needed).
 - Optionally `.gitlab-triggers.yaml` when required for the package.
-- For each relevant onboarding job, map its `TORCH_VERSION` through
+- Configure the package in exactly one build-needs lane chosen per
+  `.agents/builder/onboarding/04-collection-integration.md` (SKILL step 4):
+  `universal/cpu-ubi9` (pure Python), `torchless/<variant>` (compiled, no
+  torch), or a `torch-*` collection (bootstrap reaches torch). For the
+  `torch-*` lane, map each relevant onboarding job's `TORCH_VERSION` through
   `rhai_pipeline.torch_versions[version].builder_collection` in the root
-  `ci-job-definitions.yml` and configure the package in that exact builder
-  collection. This mapping supplies `BUILDER_TORCH_COLLECTION`; do not
-  substitute the numerically highest collection. No new collections are
-  created.
+  `ci-job-definitions.yml` to pick the exact collection; this mapping supplies
+  `BUILDER_TORCH_COLLECTION`, so do not substitute the numerically highest
+  collection. No new collections are created, and no package in `universal` or
+  `torchless` may pull torch or triton.
 
 ### Build strategy
 

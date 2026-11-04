@@ -1,9 +1,10 @@
 notes: >-
-  Combined mode for a package with optional CUDA acceleration. Builder should
-  place in CPU and CUDA; rhai-pipeline should cover all onboarding variants.
+  Combined mode for a package with optional CUDA acceleration that does not
+  reach torch. Builder should place it in the torchless lane (cpu and cuda
+  variants); rhai-pipeline should cover all onboarding variants.
 expected_mode: combined
 expected_commit_count: 2
-expected_placement: "cpu and cuda"
+expected_placement: "torchless/cpu-ubi9 and torchless/<cuda variant> (compiled, no torch)"
 expected_build_strategy: "source"
 expected_file_count: 3
 expected_specifier: "gpu-compute==0.3.1"

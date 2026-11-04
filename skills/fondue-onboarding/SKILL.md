@@ -49,14 +49,20 @@ See `references/output-format.md` for the full output contract.
 
 ### Builder (combined mode only)
 
-4. **Collection placement.** Read the root `ci-job-definitions.yml`; map each
-   relevant job's `TORCH_VERSION` through
-   `rhai_pipeline.torch_versions[version].builder_collection` (the source of
-   `BUILDER_TORCH_COLLECTION`) and use that exact builder collection. Verify
-   its CPU constraints pin `torch==`;
-   do not choose the highest collection globally or invent collections.
-   Default to CPU; add accelerators only when package dependencies or build
-   output require them.
+4. **Collection placement.** Follow
+   `.agents/builder/onboarding/04-collection-integration.md` (fondue RHAI-18385)
+   to place the package in exactly one build-needs lane. In `combined` mode it
+   has a builder override, so pick the first match:
+   - **Reaches torch**: a `torch-*` collection -- map each onboarding job's
+     `TORCH_VERSION` via `rhai_pipeline.torch_versions[version].builder_collection`
+     in the root `ci-job-definitions.yml` (`BUILDER_TORCH_COLLECTION`); use that
+     exact collection, not the highest, with CPU constraints pinning `torch==`.
+   - **Every wheel `py3-none-any`**: `universal/cpu-ubi9`.
+   - **Build differs per accelerator** (or pulls in such a package):
+     `torchless/<accelerator variant>` (plus `torchless/cpu-ubi9` if also CPU).
+   - **Otherwise**: `torchless/cpu-ubi9`.
+   One lane only; keep torch/triton out of `universal`/`torchless`. Default to
+   CPU; add accelerators only when needed.
 
 5. **Build strategy.** Build from source. A missing PyPI sdist, a
    `py3-none-any` metapackage wheel, or a failed default resolver is not proof
@@ -122,7 +128,7 @@ See `references/output-format.md` for the full output contract.
     - Body: `summary` from context
     - Trailer: `Closes: <ticket>`
 
-11. **Self-check.** For successful onboarding, verify mode-correct commit count, correct trailers, all package-supported variants/channels covered with correct shared or Torch-overlay placement, no Torch-linked shared requirement, CPU-default builder placement, `.gitlab-triggers.yaml` in the builder commit (combined), no `_run/`, no untracked files under `builder/` or `rhai-pipeline/` (`git ls-files --others --exclude-standard -- builder/ rhai-pipeline/`), and clean `git status`. For a combined-mode fail-closed source-strategy outcome, verify no commits or partial changes remain, including no generated `pre_built: true` setting.
+11. **Self-check.** For successful onboarding, verify mode-correct commit count, correct trailers, all package-supported variants/channels covered with correct shared or Torch-overlay placement, no Torch-linked shared requirement, correct single-lane builder placement (CPU by default; no torch/triton in `universal`/`torchless`), `.gitlab-triggers.yaml` in the builder commit (combined), no `_run/`, no untracked files under `builder/` or `rhai-pipeline/` (`git ls-files --others --exclude-standard -- builder/ rhai-pipeline/`), and clean `git status`. For a combined-mode fail-closed source-strategy outcome, verify no commits or partial changes remain, including no generated `pre_built: true` setting.
 
 12. **Transitive deps.** If undeclared transitive deps exist in-repo analysis, list them under `Transitive dependencies:` in the builder commit body (combined) or rhai-pipeline commit body (pipeline-only). Do not configure them.
 
@@ -142,5 +148,5 @@ Commit subject: `AIPCC-99010: add package text-utils into 'onboarding' collectio
 
 Context: `mode=combined`, pure-Python `text-utils`, `ticket=AIPCC-99001`.
 
-1. Builder commit: CPU-only in the active torch collection, includes auto-generated `.gitlab-triggers.yaml`; trailer `Relates-to: AIPCC-99001`.
+1. Builder commit: pure-Python, so `universal/cpu-ubi9` (x86_64); includes auto-generated `.gitlab-triggers.yaml`; trailer `Relates-to: AIPCC-99001`.
 2. RHAI-pipeline commit: requirements for all onboarding variants; trailer `Closes: AIPCC-99001`.

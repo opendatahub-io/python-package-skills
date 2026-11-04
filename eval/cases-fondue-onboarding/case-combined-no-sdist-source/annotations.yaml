@@ -6,7 +6,7 @@ notes: >-
   source-resolution evidence directly.
 expected_mode: combined
 expected_commit_count: 2
-expected_placement: "cpu and cuda"
+expected_placement: "torch-* collection, cpu and cuda variants (bootstrap reaches torch)"
 expected_build_strategy: "source"
 expected_file_count: 3
 expected_specifier: "transformer-engine==2.19.0"
