@@ -35,10 +35,13 @@ jobs:
         enable-cache: true
 
     - name: Install Python dependencies
-      run: uv pip install --system ruff
+      run: uv pip install --system ruff pytest jsonschema==4.23.0 pyyaml
 
     - name: Run ruff check
       run: ruff check .
 
     - name: Run ruff format check
       run: ruff format --check --diff .
+
+    - name: Run unit tests
+      run: python -m pytest tests/ -q

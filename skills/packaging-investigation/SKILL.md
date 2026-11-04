@@ -191,8 +191,8 @@ Field details:
      "$skill_dir/schemas/investigation-verdict.json" \
      .investigation-verdict.json \
      --input .investigation-verdict.json
-   uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
-     ${CLAUDE_SKILL_DIR}/schemas/torch-evidence.json \
+   uv run --script "$skill_dir/scripts/write_json.py" \
+     "$skill_dir/schemas/torch-evidence.json" \
      .torch-evidence.json \
      --input .torch-evidence.json
    ```

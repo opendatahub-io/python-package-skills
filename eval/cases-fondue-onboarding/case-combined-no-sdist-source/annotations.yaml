@@ -7,6 +7,7 @@ notes: >-
 expected_mode: combined
 expected_commit_count: 2
 expected_placement: "torch-* collection, cpu and cuda variants (bootstrap reaches torch)"
+expected_builder_placements: ["torch-2.14.0/cpu-ubi9", "torch-2.14.0/cuda13.0-ubi9"]
 expected_build_strategy: "source"
 expected_file_count: 3
 expected_specifier: "transformer-engine==2.19.0"

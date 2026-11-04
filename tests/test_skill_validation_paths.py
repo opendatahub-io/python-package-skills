@@ -11,25 +11,31 @@ VALIDATORS = (
     (
         "license-check",
         "license-verdict.json",
-        "6. **Validate the verdict:**",
+        "**Validate the verdict:**",
         "SKILL.md",
     ),
     (
         "security-audit",
         "security-verdict.json",
-        "7. **Validate the verdict:**",
+        "**Validate the verdict:**",
         "SKILL.md",
     ),
     (
         "packaging-investigation",
         "investigation-verdict.json",
-        "7. **Validate the verdict:**",
+        "**Validate both JSON artifacts:**",
+        "SKILL.md",
+    ),
+    (
+        "packaging-investigation",
+        "torch-evidence.json",
+        "**Validate both JSON artifacts:**",
         "SKILL.md",
     ),
     (
         "hardware-variant",
         "hardware-variant-verdict.json",
-        "5. Validate the result:",
+        "Validate the result:",
         "SKILL.md",
     ),
     (
@@ -67,12 +73,16 @@ def test_validator_resolves_bundled_files(
     (skill_dir / "schemas").mkdir()
     (skill_dir / "SKILL.md").touch()
     (skill_dir / "scripts" / "write_json.py").touch()
-    (skill_dir / "schemas" / schema_name).touch()
+    for schema in {schema_name, "investigation-verdict.json", "torch-evidence.json"}:
+        (skill_dir / "schemas" / schema).touch()
 
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     uv = bin_dir / "uv"
-    uv.write_text('#!/bin/sh\nprintf "%s\\n" "$@" > "$UV_ARGS_FILE"\n')
+    uv.write_text(
+        '#!/bin/sh\nprintf "%s\\n" "$@" >> "$UV_ARGS_FILE"\n'
+        'printf "\\n" >> "$UV_ARGS_FILE"\n'
+    )
     uv.chmod(0o755)
     args_file = tmp_path / "uv-args.txt"
 
@@ -87,10 +97,17 @@ def test_validator_resolves_bundled_files(
     )
 
     assert result.returncode == 0, result.stderr.decode()
-    args = args_file.read_text().splitlines()
-    assert args[:4] == [
+    calls = [call.splitlines() for call in args_file.read_text().strip().split("\n\n")]
+    for args in calls:
+        assert args[:3] == [
+            "run",
+            "--script",
+            str(skill_dir / "scripts" / "write_json.py"),
+        ]
+        assert Path(args[3]).is_file()
+    assert [
         "run",
         "--script",
         str(skill_dir / "scripts" / "write_json.py"),
         str(skill_dir / "schemas" / schema_name),
-    ]
+    ] in [args[:4] for args in calls]

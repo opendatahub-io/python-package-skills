@@ -6,3 +6,6 @@
   changes. Do not create a package plugin that cannot resolve source.
 - Never use `pre_built: true` for automated onboarding.
 - Use `Relates-to: <TICKET>` on a successful builder commit.
+
+Follow [Collection Integration](onboarding/04-collection-integration.md) for
+build-needs lanes and the exact Torch collection mapping.
