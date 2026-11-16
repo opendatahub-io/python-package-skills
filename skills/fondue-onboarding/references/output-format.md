@@ -11,11 +11,21 @@ Downstream CI reads committed configuration under `builder/` and/or
 | Mode | Commits | Subtrees touched |
 |------|---------|------------------|
 | `pipeline-only` | Exactly 1 | `rhai-pipeline/` only |
-| `combined` (successful) | Exactly 2 | First: `builder/` (and optionally `.gitlab-triggers.yaml`); second: `rhai-pipeline/` |
+| `pipeline-only` (dependency failure) | Exactly 1 | `rhai-pipeline/` only; the failing dependency is listed in the commit body, never configured |
+| `combined` (successful, builder change needed) | Exactly 2 | First: `builder/` (and optionally `.gitlab-triggers.yaml`); second: `rhai-pipeline/` |
+| `combined` (successful, no builder change needed) | Exactly 1 | `rhai-pipeline/` only; the commit body states why no builder change was needed |
 | `combined` (fail-closed source strategy) | Exactly 0 | None; remove partial changes and leave a clean tree |
 
 The working tree must be clean after completion (no uncommitted changes and no
 staged `_run/` directory), including a fail-closed outcome with no commits.
+
+The context's `placement_plan` (when present) constrains the rhai-pipeline
+placement: its `variants` are the shared-requirements variants, its
+`torch_lanes` are the overlay channels, its `excluded_torch_lanes` must never
+receive the package, and `s390x_marker_required` makes the plan's
+`s390x_marker` mandatory on every requirement line for the package. Fields the
+host could not decide are empty and their `unknowns` entries say why; decide
+those parts from the evidence procedure below.
 
 ## Builder commit (combined mode only)
 
@@ -89,7 +99,11 @@ Closes: <ticket>
   are identified that are not already configured, list them in a
   "Transitive dependencies:" section, one per line (pipeline-only mode only for
   this listing when there is no builder commit; in combined mode prefer listing
-  them on the builder commit).
+  them on the builder commit). When the context's `dependency_failures` is
+  non-empty, list the failing dependencies in a "Failing dependencies:" section,
+  one `name: evidence` line each, and never configure them. When no builder
+  commit was needed in combined mode, state in the body why the requested
+  package needs no builder-side change.
 - **Trailer**: `Closes: <ticket>` as the last line.
 
 ### Requirements file format
@@ -170,15 +184,20 @@ Stage changed `rhai-pipeline/` files by name. Check for untracked files under
 
 ## Validation rules
 
-- Commit count must match the outcome: 1 for pipeline-only, 2 for successful
-  combined onboarding, or 0 for a combined fail-closed source-strategy outcome.
+- Commit count must match the outcome: 1 for pipeline-only (including a
+  dependency-failure outcome), 2 for a successful combined onboarding with
+  builder changes, 1 for a successful combined onboarding with no builder
+  change needed, or 0 for a combined fail-closed source-strategy outcome.
 - The rhai-pipeline commit (last commit) must include a `Closes: <ticket>` trailer.
 - In successful combined mode, the builder commit must include a
   `Relates-to: <ticket>` trailer.
 - The working tree must be clean after committing (`git status --porcelain` empty).
 - No files from `_run/` may appear in any commit.
 - An ordinary package must have a requirements file for every supported variant.
-  A Torch-linked package must appear only in supported channel overlays.
+  A Torch-linked package must appear only in supported channel overlays. When
+  the context's `placement_plan` excludes torch lanes or requires the s390x
+  marker, the diff must conform: no entry in an excluded channel, and the
+  marker present on every requirement line for the package.
 - Each ordinary requirements file contains one line with the package specifier
   and tracking comment. Each Torch overlay entry has its channel pin or remains
   unpinned when the matching builder collection has an exact pin.

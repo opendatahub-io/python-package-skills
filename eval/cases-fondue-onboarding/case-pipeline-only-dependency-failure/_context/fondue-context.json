@@ -1,0 +1,29 @@
+{
+  "ticket": "AIPCC-31598",
+  "package_name": "text-utils",
+  "package_version": "1.2.0",
+  "package_info": "Name: text-utils\nVersion: 1.2.0\nSummary: Pure Python text processing utilities\nLicense: MIT",
+  "analysis": "Simple pure-Python package. No native dependencies. The self-service build failed only because its dependency jaxlib failed to resolve.",
+  "jira_context": "Add text-utils 1.2.0 to the pipeline onboarding collection.",
+  "summary": "text-utils 1.2.0 is a pure Python package. The build failure is in a dependency (jaxlib), not in text-utils itself.",
+  "requirements_comment": "# AIPCC-31598",
+  "mode": "pipeline-only",
+  "dependency_failures": [
+    {
+      "distribution": "jaxlib",
+      "evidence": "ERROR: No matching distribution found for jaxlib"
+    }
+  ],
+  "placement_plan": {
+    "package": "text-utils",
+    "collection": "onboarding",
+    "torch_mode": "shared",
+    "variants": ["cpu-torch2.4", "cpu-torch2.6", "cuda-torch2.6"],
+    "torch_lanes": [],
+    "excluded_torch_lanes": [],
+    "torch_specifier": "",
+    "s390x_marker_required": false,
+    "s390x_marker": "platform_machine != \"s390x\"",
+    "unknowns": []
+  }
+}

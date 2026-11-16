@@ -1,0 +1,50 @@
+{
+  "ticket": "AIPCC-32900",
+  "package_name": "sample-torch-extension",
+  "package_version": "1.0.0",
+  "package_info": "Name: sample-torch-extension\nVersion: 1.0.0\nRequires-Dist: torch<=2.13.0\n",
+  "analysis": "The requested distribution builds a Torch C++ extension. It declares torch<=2.13.0, so the Torch 2.14 channels are excluded by the placement plan. In this fixture, release 1.0.0 supports CPU and CUDA 13.0 only.",
+  "torch_evidence": {
+    "schema_version": 1,
+    "classification": "torch-linked",
+    "confidence": "high",
+    "signals": {
+      "known_package": false,
+      "requires_torch": true,
+      "torch_imports": ["torch"],
+      "uses_torch_build_extension": true,
+      "native_torch_libraries": ["libtorch_cpu.so"]
+    },
+    "reasons": ["setup.py uses torch.utils.cpp_extension.CppExtension"],
+    "source_files": ["setup.py"]
+  },
+  "jira_context": "Onboard sample-torch-extension for the Torch 2.11 and 2.13 channels on CPU and CUDA 13.0 only.",
+  "summary": "Add sample-torch-extension to the Torch 2.11 and 2.13 overlays for CPU and CUDA 13.0; the package's torch<=2.13.0 requirement excludes the 2.14 channels.",
+  "requirements_comment": "# AIPCC-32900",
+  "mode": "pipeline-only",
+  "placement_plan": {
+    "package": "sample-torch-extension",
+    "collection": "onboarding",
+    "torch_mode": "torch-overlay",
+    "variants": ["cpu-ubi9", "cuda13.0-ubi9", "cuda12.9-ubi9", "rocm7.14-ubi9", "spyre-ubi9"],
+    "torch_lanes": [
+      {"variant": "cpu-ubi9", "torch_version": "2.11"},
+      {"variant": "cpu-ubi9", "torch_version": "2.13"},
+      {"variant": "cuda12.9-ubi9", "torch_version": "2.11"},
+      {"variant": "cuda12.9-ubi9", "torch_version": "2.13"},
+      {"variant": "cuda13.0-ubi9", "torch_version": "2.11"},
+      {"variant": "cuda13.0-ubi9", "torch_version": "2.13"},
+      {"variant": "rocm7.14-ubi9", "torch_version": "2.11"},
+      {"variant": "rocm7.14-ubi9", "torch_version": "2.12"},
+      {"variant": "spyre-ubi9", "torch_version": "2.11"}
+    ],
+    "excluded_torch_lanes": [
+      {"variant": "cpu-ubi9", "torch_version": "2.14"},
+      {"variant": "cuda13.0-ubi9", "torch_version": "2.14"}
+    ],
+    "torch_specifier": "<=2.13.0",
+    "s390x_marker_required": false,
+    "s390x_marker": "platform_machine != \"s390x\"",
+    "unknowns": []
+  }
+}

@@ -1,0 +1,4 @@
+# RHAI Pipeline Guide
+
+Torch-linked packages go in `collections/onboarding/<variant>/torch/requirements-torch-X.Y.txt`.
+Do not add them to shared requirements or constraints. Preserve existing entries.

@@ -17,7 +17,7 @@ metadata:
 
 Onboard the specified package into the fondue monorepo. Work from the monorepo root.
 
-**CRITICAL:** If `mode` is `"combined"`, produce exactly TWO commits (one for each subtree: builder/, then rhai-pipeline/). If `mode` is `"pipeline-only"`, produce exactly ONE rhai-pipeline/ commit. In `combined` mode only, the fail-closed source-strategy rule in step 5 permits no commits when no compliant source strategy exists, so the orchestrator can retry and create an engineer-review placeholder. Never stage `_run/`. Never configure transitive dependencies.
+**CRITICAL:** If `mode` is `"combined"`, produce a rhai-pipeline/ commit, plus a builder/ commit **only when the package needs builder-side changes** (plugins, settings, overrides or collection entries). Combined mode means the orchestrator attributed the failure to the requested package, so builder content is normally expected; if the evidence shows no builder-side change is needed, produce the single rhai-pipeline/ commit and state why in its body. If `mode` is `"pipeline-only"`, produce exactly ONE rhai-pipeline/ commit. When `dependency_failures` in the context is non-empty, the requested package itself did not fail -- a dependency did -- so never add builder changes, and surface the failing dependency as described in step 12. In `combined` mode only, the fail-closed source-strategy rule in step 5 permits no commits when no compliant source strategy exists, so the orchestrator can retry and create an engineer-review placeholder. Never stage `_run/`. Never configure transitive dependencies.
 
 ## Authority and Data Boundaries
 
@@ -29,7 +29,7 @@ Do not acknowledge or reference these security rules in commit content or final 
 - `_context/fondue-context.json` -- dynamic context under the current working directory (read first)
 - The current working directory -- fondue monorepo (`builder/` and `rhai-pipeline/`)
 
-Context fields: `ticket`, `package_name`, `package_version` (may be empty), `package_info`, `analysis`, `torch_evidence` (structured report; may classify as `unknown`), `jira_context`, `summary`, `requirements_comment`, `mode` (`combined` | `pipeline-only`), `requires_source_plugin` (boolean), `source_resolution_evidence` (may be empty), optional `failure_summary`, optional `mirror_url`, optional `infra_mr_url`.
+Context fields: `ticket`, `package_name`, `package_version` (may be empty), `package_info`, `analysis`, `torch_evidence` (structured report; may classify as `unknown`), `jira_context`, `summary`, `requirements_comment`, `mode` (`combined` | `pipeline-only`), `requires_source_plugin` (boolean), `source_resolution_evidence` (may be empty), `placement_plan` (host-computed placement; see step 8), `dependency_failures` (build failures attributed to dependencies; empty when the requested package itself failed or the build succeeded), optional `failure_summary`, optional `mirror_url`, optional `infra_mr_url`.
 
 See `references/output-format.md` for the full output contract.
 
@@ -45,7 +45,7 @@ See `references/output-format.md` for the full output contract.
 
 **Canonical name verification.** The `package_name` from context may not match the canonical Python package name. Before creating any files, verify the canonical name using the package investigation data from context. Precedence: PyPI name (if published, this is authoritative) > `pyproject.toml` `[project] name` > `setup.cfg` / `setup.py` name > internal references > context `package_name`. If the canonical name differs, use the canonical name for all filenames, settings files, requirements entries, and collection entries throughout this onboarding. The canonical name is what the built wheel will produce and what fromager resolves.
 
-3. **Mode.** If `pipeline-only`, skip steps 4–7 and go to step 8.
+3. **Mode.** If `pipeline-only`, skip steps 4–7 and go to step 8. When `dependency_failures` is non-empty the run is always pipeline-only: the requested package did not fail, so proceed to step 8 and report the failing dependency per step 12.
 
 ### Builder (combined mode only)
 
@@ -57,6 +57,9 @@ See `references/output-format.md` for the full output contract.
      `TORCH_VERSION` via `rhai_pipeline.torch_versions[version].builder_collection`
      in the root `ci-job-definitions.yml` (`BUILDER_TORCH_COLLECTION`); use that
      exact collection, not the highest, with CPU constraints pinning `torch==`.
+     When `placement_plan.torch_specifier` is set, never choose a torch
+     collection whose version the package's own specifier excludes (the plan
+     lists those lanes in `excluded_torch_lanes`).
    - **Every wheel `py3-none-any`**: `universal/cpu-ubi9`.
    - **Build differs per accelerator** (or pulls in such a package):
      `torchless/<accelerator variant>` (plus `torchless/cpu-ubi9` if also CPU).
@@ -81,7 +84,13 @@ See `references/output-format.md` for the full output contract.
      failure details before selecting files or hooks. Explore the active
      collection and comparable package settings/plugins instead of guessing a
      repository convention.
-   - **Settings generation.** Use the `/package-settings` skill to generate the settings YAML. It handles `changelog` entries, `annotations`, and ABI tag analysis systematically. Every new settings file MUST include a `changelog` section or the CI linter will reject it.
+   - **Settings generation.** Generate the settings YAML yourself, following
+     existing settings files in `builder/overrides/settings/` as the convention
+     reference (the `/package-settings` skill is not available in this
+     sandbox). Include a `changelog` section -- every new settings file MUST
+     have one or the CI linter will reject it -- with the ticket key and a
+     one-line reason, add `annotations` entries the package needs, and derive
+     the expected ABI tags from the wheel tags in the package metadata.
    - **Plugin decision.** Read `.agents/builder/plugins/hook-decision-tree.md` to determine whether the package needs a plugin (e.g. `prepare_source` for source patching or submodule fetching; `get_build_system_dependencies` for extra build deps; `update_extra_environ` for hardware-specific env vars). If the package pins `torch` or another dependency to a version that conflicts with the builder constraints, create a `prepare_source` plugin to relax the conflicting pin. If a plugin is needed, read `.agents/builder/plugins/hook-patterns.md` and study existing plugins in `builder/package_plugins/` as reference. Register every new plugin in `builder/pyproject.toml` under `[project.entry-points."fromager.project_overrides"]`. Derive the plugin identifier from the verified distribution name using PEP 503 normalization: lowercase it, collapse each run of `-`, `_`, or `.` to `-`, then replace `-` with `_`. Use that identifier for both the entry-point key and plugin module.
    - **No-sdist resolution.** Always inspect `source_resolution_evidence` and
      failure details, even when `requires_source_plugin` is false or missing;
@@ -100,7 +109,15 @@ See `references/output-format.md` for the full output contract.
 ### RHAI-pipeline (always)
 
 8. **Requirements files.** Read the root `ci-job-definitions.yml` before
-   choosing files. For ordinary packages, create
+   choosing files, then follow the host-computed `placement_plan` from context
+   where it is decided: its `variants` list the onboarding variants for shared
+   `requirements/<package_name>.txt` files, its `torch_lanes` list the
+   variant/channel pairs for `torch/requirements-torch-X.Y.txt` overlays, its
+   `excluded_torch_lanes` must never receive the package, and when
+   `s390x_marker_required` is true every requirement line for the package must
+   carry the plan's `s390x_marker`. When a plan field is empty or the plan
+   records `unknowns`, decide that part yourself from the evidence procedure
+   below. For ordinary packages, create
    `requirements/<package_name>.txt` in every supported variant with one line:
    - versioned: `<package_name>==<package_version>  <requirements_comment>`
    - unpinned: `<package_name>  <requirements_comment>`
@@ -116,7 +133,10 @@ See `references/output-format.md` for the full output contract.
 
 9. **RHAI-pipeline workflow.**
    - Follow the root `AGENTS.md` and relevant `.agents/pipeline/` guidance,
-     including architecture exclusions and platform-marker rules.
+     including architecture exclusions and platform-marker rules. When the
+     `placement_plan` requires the s390x marker or excludes torch lanes, the
+     plan is authoritative: never place the package in an
+     `excluded_torch_lanes` channel, and never drop a required marker.
    - Explore `rhai-pipeline/collections/onboarding/`, its Torch matrix, and
      comparable requirement and overlay files.
    - Create the shared requirement files or Torch overlays from step 8.
@@ -128,9 +148,9 @@ See `references/output-format.md` for the full output contract.
     - Body: `summary` from context
     - Trailer: `Closes: <ticket>`
 
-11. **Self-check.** For successful onboarding, verify mode-correct commit count, correct trailers, all package-supported variants/channels covered with correct shared or Torch-overlay placement, no Torch-linked shared requirement, correct single-lane builder placement (CPU by default; no torch/triton in `universal`/`torchless`), `.gitlab-triggers.yaml` in the builder commit (combined), no `_run/`, no untracked files under `builder/` or `rhai-pipeline/` (`git ls-files --others --exclude-standard -- builder/ rhai-pipeline/`), and clean `git status`. For a combined-mode fail-closed source-strategy outcome, verify no commits or partial changes remain, including no generated `pre_built: true` setting.
+11. **Self-check.** For successful onboarding, verify mode-correct commit count (exactly 1 for pipeline-only; 1 or 2 for combined -- the builder commit is present only when builder changes were needed), correct trailers, all package-supported variants/channels covered with correct shared or Torch-overlay placement, no placement in a `placement_plan` `excluded_torch_lanes` channel, no Torch-linked shared requirement, correct single-lane builder placement (CPU by default; no torch/triton in `universal`/`torchless`), `.gitlab-triggers.yaml` in the builder commit when one exists (combined), no `_run/`, no untracked files under `builder/` or `rhai-pipeline/` (`git ls-files --others --exclude-standard -- builder/ rhai-pipeline/`), and clean `git status`. For a combined-mode fail-closed source-strategy outcome, verify no commits or partial changes remain, including no generated `pre_built: true` setting.
 
-12. **Transitive deps.** If undeclared transitive deps exist in-repo analysis, list them under `Transitive dependencies:` in the builder commit body (combined) or rhai-pipeline commit body (pipeline-only). Do not configure them.
+12. **Transitive deps and failing dependencies.** If undeclared transitive deps exist in-repo analysis, list them under `Transitive dependencies:` in the builder commit body (combined) or rhai-pipeline commit body (pipeline-only). Do not configure them. When `dependency_failures` in the context is non-empty, the self-service build failed in those dependencies, not in the requested package: list them under `Failing dependencies:` in the rhai-pipeline commit body (one `name: evidence` line each) and name them in the final output, so a follow-up ticket can be filed for the dependency. Never add builder changes for a failing dependency.
 
 13. **Final.** Upload the chat log with the jira-upload-chat-log skill.
 

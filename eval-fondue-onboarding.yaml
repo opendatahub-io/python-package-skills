@@ -91,6 +91,13 @@ dataset:
     - expected_specifier: >-
         Required prefix of the requirements line. Use pkg==ver for pinned
         cases, or "pkg  #" for unpinned (rejects an unexpected pin).
+    - expected_failing_dependencies: >-
+        Dependency names a dependency-failure case must list under
+        "Failing dependencies:" in the rhai-pipeline commit body. Such a
+        case must also change no builder/ files.
+    - expected_excluded_torch_lanes: >-
+        variant:channel pairs the placement plan excludes; the package must
+        not appear in those overlays even though jobs exist.
     - expected_placement: Builder variant placement (combined cases).
     - expected_builder_placements: Exact collection/variant pairs for the
       target package's builder requirements (successful combined cases).
@@ -317,6 +324,47 @@ judges:
       if subject != expected:
           return False, f"Subject '{subject}' != expected '{expected}'"
       return True, f"Subject exactly matches: {subject}"
+
+  - name: failing_dependencies_listed
+    if: "annotations.get('expected_failing_dependencies')"
+    description: Verify a dependency-failure outcome lists the failing dependencies in the commit body
+    check: |
+      import subprocess
+      expected = annotations.get("expected_failing_dependencies", [])
+      result = subprocess.run(
+          ["git", "log", "-1", "--format=%B"],
+          capture_output=True, text=True
+      )
+      if result.returncode != 0:
+          return False, "Could not read commit message"
+      msg = result.stdout
+      errors = []
+      if "Failing dependencies:" not in msg:
+          errors.append("commit body has no 'Failing dependencies:' section")
+      for name in expected:
+          if name not in msg:
+              errors.append(f"failing dependency '{name}' not named in the commit body")
+      # A dependency failure must not produce builder changes.
+      log = subprocess.run(
+          ["git", "log", "--format=%H\t%an"],
+          capture_output=True, text=True
+      )
+      lines = log.stdout.strip().splitlines()
+      skill_hashes = [l.split("\t")[0] for l in lines if "\teval-setup" not in l]
+      if skill_hashes:
+          diff = subprocess.run(
+              ["git", "diff", "--name-only", f"{skill_hashes[-1]}^..HEAD"],
+              capture_output=True, text=True
+          )
+          builder = [
+              p for p in diff.stdout.splitlines()
+              if p == "builder" or p.startswith("builder/")
+          ]
+          if builder:
+              errors.append("dependency-failure outcome changed builder/: " + ", ".join(builder[:5]))
+      if errors:
+          return False, "; ".join(errors)
+      return True, "Failing dependencies listed: " + ", ".join(expected)
 
   - name: builder_collection_placement
     if: "annotations.get('expected_mode') == 'combined' and annotations.get('expected_commit_count', 1) > 0"
@@ -835,6 +883,8 @@ thresholds:
   pipeline_commit_message:
     min_mean: 1.0
   pipeline_commit_subject_exact:
+    min_mean: 1.0
+  failing_dependencies_listed:
     min_mean: 1.0
   builder_commit_trailer:
     min_mean: 1.0
