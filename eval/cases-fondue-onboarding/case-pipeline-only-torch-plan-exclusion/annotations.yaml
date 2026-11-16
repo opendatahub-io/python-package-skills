@@ -1,0 +1,20 @@
+notes: >-
+  The host placement plan excludes the Torch 2.14 lanes: the package declares
+  torch<=2.13.0 (the speculators case). The skill must follow the plan, place
+  the package only in the CPU and CUDA 13.0 Torch 2.11 and 2.13 overlays, and
+  never in a 2.14 overlay even though those jobs exist in the matrix.
+requirements_mode: torch-overlay
+expected_mode: pipeline-only
+expected_commit_count: 1
+expected_ticket: AIPCC-32900
+expected_package: sample-torch-extension
+expected_specifier: sample-torch-extension==1.0.0
+expected_torch_placements: [cpu-ubi9:2.11, cpu-ubi9:2.13, cuda13.0-ubi9:2.11, cuda13.0-ubi9:2.13]
+expected_job_matrix:
+  cpu-ubi9: ["2.11", "2.13", "2.14"]
+  cuda13.0-ubi9: ["2.11", "2.13", "2.14"]
+  cuda12.9-ubi9: ["2.11", "2.13"]
+  rocm7.14-ubi9: ["2.11", "2.12"]
+  spyre-ubi9: ["2.11"]
+expected_preserved_specifier: unrelated==1.0
+expected_excluded_torch_lanes: [cpu-ubi9:2.14, cuda13.0-ubi9:2.14]
